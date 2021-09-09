@@ -1,0 +1,1 @@
+{"HOST":"192.168.0.16","REQUEST_URI":"\/facturacion\/flujo\/login.php","requestType":"POST","cookie":{"csrfp_token":"bb4b814b6b","PHPSESSID":"nbk2d6c6dvpbf7arq09q6f2pi6"},"timestamp":1557782190,"message":"OWASP CSRF PROTECTOR VALIDATION FAILURE"}

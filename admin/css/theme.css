@@ -1,0 +1,240 @@
+html,
+body {
+  height: 100%;
+  /*padding-top: 15px;*/
+  /*font-family:ubuntu,tahoma,sans-serif*/
+
+  /* The html and body elements cannot have any padding or margin. */
+}
+
+/* Wrapper for page content to push down footer */
+#wrap {
+  min-height: 100%;
+  height: auto;
+  /* Negative indent footer by its height */
+  margin: 0 auto -40px;
+  /* Pad bottom by footer height */
+  padding: 0 0 60px;
+}
+
+/* Set the fixed height of the footer here */
+#footer {
+  height: 40px;
+  /*background-color: #E0E0E0;*/
+}
+
+
+#footer a{
+  height: 40px;
+  color: #f05f40;
+}
+
+/*.container {
+  width: auto;
+  max-width: 1900px;
+  padding: 0 20px;
+
+}*/
+.container .text-muted {
+  margin: 10px auto 0 auto;
+  text-align:center
+  
+}
+
+.theme-dropdown .dropdown-menu {
+  display: block;
+  position: static;
+  margin-bottom: 20px;
+}
+
+.theme-showcase > p > .btn {
+  margin: 5px 0;
+}
+
+.form-signin {
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+.form-signin-heading{
+margin-top:0;
+}
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+  margin-bottom: 10px;
+}
+.form-signin .checkbox {
+  margin-top:10px;
+  font: normal 13px Verdana;
+}
+.form-signin .form-control {
+  position: relative;
+  font-size: 16px;
+  height: auto;
+  padding: 10px;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+}
+.form-signin .form-control:focus {
+  z-index: 2;
+}
+.form-signin input[type="text"] {
+  margin-bottom: -1px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/*.login{
+  margin-top:40px;
+  margin-left:auto;
+  margin-right:auto;
+  width:50%;
+  height:40%;
+  font-size:14px;
+  line-height:1.3;
+  font-weight:bold;
+}*/
+
+.jumbotron{
+  margin-top:auto;
+  margin-left:auto;
+  margin-right:auto;
+  width:100%;
+  height:100%;
+  font-size:14px;
+  line-height:1.3;
+  font-weight:bold;
+}
+.jqx-widget-content {
+  font:12px ubuntu,tahoma,sans-serif;
+}
+
+h2{
+    margin-top: 0;
+    margin-bottom: 0;
+    }
+    .page-header{
+    margin-top:60px;
+    margin-bottom:15px;
+    padding-bottom:5px
+    }
+    
+.colorgraph {
+  background: linear-gradient(to right, #c4e17f, #c4e17f 12.5%, #f7fdca 12.5%, #f7fdca 25%, #fecf71 25%, #fecf71 37.5%, #f0776c 37.5%, #f0776c 50%, #db9dbe 50%, #db9dbe 62.5%, #c49cde 62.5%, #c49cde 75%, #669ae1 75%, #669ae1 87.5%, #62c2e4 87.5%, #62c2e4) repeat scroll 0 0 #c4e17f;
+  border-radius: 5px;
+  border-top: 0 none;
+  height: 5px;
+}
+
+.modal-lg {
+    width: 90%;
+}
+
+.modal-title{
+	font-weight: Bold;
+}
+
+.modal-header {
+	padding: 5px 10px 5px 10px;
+}
+
+.jqx-dropdownlist-state-normal {
+	padding-left:0;
+	padding-right:0;
+}
+
+.widget {
+    border-radius: 3px;
+    color: #fff;
+    margin-bottom: 20px;
+    overflow: hidden;
+    padding: 15px;
+}
+
+.widget-stats .stats-icon {
+    color: #fff;
+    font-size: 42px;
+    height: 56px;
+    line-height: 56px;
+    margin-left: 15px;
+    opacity: 0.2;
+    position: absolute;
+    right: 35px;
+    text-align: center;
+    top: 30px;
+    width: 56px;
+}
+
+.widget-stats .stats-link p{
+    color: #fff;
+    font-size: 11px;
+    margin: 5px 0 0 0;
+	cursor:pointer
+}
+
+.widget-stats .stats-info h4 {
+    color: #fff;
+    font-size: 12px;
+    margin: 5px 0;
+}
+
+.widget-stats .stats-info p {
+    font-size: 24px;
+    font-weight: 300;
+    margin-bottom: 0;
+}
+
+.bg-green {
+    background: #00acac none repeat scroll 0 0 !important;
+}
+
+.bg-blue {
+    background: #348fe2 none repeat scroll 0 0 !important;
+}
+
+.bg-purple {
+    background: #727cb6 none repeat scroll 0 0 !important;
+}
+
+.bg-red {
+    background: #ff5b57 none repeat scroll 0 0 !important;
+}
+
+/*Achicar titulos*/
+@media (max-width: 480px) { 
+   h2 {
+        font-size:16px;
+    }
+ }
+@media (min-width: 481px) and (max-width:768px) { 
+   h2 {
+        font-size:18px;
+    }
+}
+@media (min-width: 769px) and (max-width:992px) {
+   h2 {
+        font-size:25px;
+    }
+ }
+
+.navbar {
+    background-color: #3e3f3a !important;
+    border-color: #3e3f3a;
+}
+.navbar a{
+  /*color:#98978b;*/
+  color:#ccc;
+}
+.navbar a:hover{
+  color:#fff;
+}
+
+.navbar .navbar-toggle .icon-bar {
+    background-color: #ffffff;
+}

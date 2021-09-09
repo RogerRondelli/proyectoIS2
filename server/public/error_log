@@ -1,0 +1,2 @@
+[06-May-2020 23:53:25 UTC] PHP Parse error:  syntax error, unexpected '.' in /home/denunciaspy/public_html/server3/src/send.php on line 115
+[06-May-2020 23:53:57 UTC] PHP Parse error:  syntax error, unexpected ''.$th, FILE_APPEND);' (T_ENCAPSED_AND_WHITESPACE), expecting ',' or ')' in /home/denunciaspy/public_html/server3/src/send.php on line 115

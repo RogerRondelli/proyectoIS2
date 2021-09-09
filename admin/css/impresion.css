@@ -1,0 +1,274 @@
+body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #FAFAFA;
+        font: 0.325cm "Arial";
+    }
+    * {
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+    }
+.page {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 0.87cm 0.7cm 0.7cm 0.2cm;
+        /*margin: 10mm auto;*/
+        border: 1px #D3D3D3 solid;
+        border-radius: 5px;
+        background: white;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    @media print {
+        html, body {
+            width: 210mm;
+            height: 297mm;        
+        }
+        .page {
+            margin: 0;
+            border: initial;
+            border-radius: initial;
+            width: initial;
+            min-height: initial;
+            box-shadow: initial;
+            background: initial;
+            page-break-after: always;
+        }
+    }
+
+.pad
+{
+	font-size:0.344cm;
+}
+
+#div1
+{
+	margin-bottom:0.15cm;
+	margin-right: 0.7cm;
+	text-align:center;
+	border-radius:8px;
+	width:11cm;
+	height:2.45cm;
+	border: 1px solid white;
+	float: left;
+	visibility: hidden;
+}
+#div2
+{
+	margin-bottom:0.15cm;
+	height:2.45cm;
+	text-align:center;
+	border-radius:8px;
+	float:left;
+	width:7.8;
+	border: 1px solid white;
+	visibility: hidden;
+}
+.enlinea
+{
+	margin-left: 50px;
+	display:inline;
+	font-size:0.325cm;
+	color:black;
+	font-style:bold;
+}
+.ocultar
+{
+	visibility:hidden;
+}
+
+.tres
+{
+	border-bottom: 1px solid white;
+	vertical-align:middle;
+}
+#idtres
+{
+	width:60%;
+}
+#tabla_liq
+{
+	border: 0px;
+	border-collapse:collapse;
+	padding:0px;
+	border-spacing:0px;
+	width: 100%;
+}
+#tabla_liq td {margin:0;border:0px !important;}
+
+#td_1 {width:17%;}
+#td_2 {width:8%;}
+#td_3 {width:10%;}
+#td_4 {width:12%;}
+#td_5 {width:15%;}
+#td_6 {width:14%;}
+#td_7 {width:24%;}
+
+#tabla1
+{
+	margin-bottom: 0cm;
+	border: 1px solid white;
+	vertical-align:top;
+	width:19.5cm;
+	border-radius:8px;
+	border-spacing:0px;
+}
+
+.si_bottom
+{
+	border-bottom: 1px solid white;
+}
+.no_bottom
+{
+	border-bottom: 0px;
+}
+#tabla2
+{
+	text-align: center;
+	width:19.5cm;
+	border-radius:8px;
+	border-spacing:0;
+}
+#tabla2 td
+{
+	border: 1px solid white;
+	padding:0; margin:0;
+}
+.pad td
+{
+	padding-top:0px;
+	padding-bottom:0px;
+}
+#sup_izq
+{
+	width: 1.4cm;
+	border-top-left-radius:8px;
+}
+#sup_der
+{
+	border-top-right-radius:8px;
+}
+#inf_izq
+{
+	border-bottom-left-radius:8px;
+}
+#inf_der
+{
+	border-bottom-right-radius:8px;
+	font-size: 6px;
+	padding:3px;
+}
+.col_iva
+{
+	width:2.166cm;
+}
+#precio
+{
+	width:2.19cm;
+}
+#desc
+{
+	width:9.57cm;
+}
+#tabla3
+{
+	border-collapse:separate;
+	border-spacing:0px;
+	border: 0px;
+	text-align: center;
+	width:900px;
+}
+.cuadradito
+{
+	border: 1px solid black;
+	width:20px;
+	display:inline;
+}
+.imagen
+{
+    float: left;
+}
+#imagen
+{
+	margin-left: 3%;
+	height:95px; 
+}
+
+#div1 > p, #div2 > p
+{
+	display:inline;
+}
+
+.ali_izq
+{
+	text-align:left;
+}
+.relleno
+{
+	text-align:left;
+	font-size:0.344cm;
+	color:black;
+	font-style:bold;
+}
+.ali_izq td, .ali_izq
+{
+	padding-top:5px;
+	padding-bottom:5px;
+}
+#liq
+{
+	padding-top:0px;
+	padding-bottom:0px;
+}
+#ali_cen
+{
+	text-align:center;
+	font-size:0.344cm;
+}
+.cabezera
+{
+	font-size: 18px;
+	font-style: bold;
+	text-align: left;
+}
+.cabezera1
+{
+	font-size: 0.344cm;
+	text-align: left;
+}
+
+.cabezera2
+{
+	font-size: 7.7px;
+	text-align: left;
+}
+.cabezera3
+{
+	font-size: 19px;
+	text-align: left;
+}
+.cabezera4
+{
+	font-size: 6px;
+	text-align: left;
+	padding:3px;
+}
+.cabezera5
+{
+	font-size: 8px;
+	text-align: left;
+}
+#info_empresa
+{
+	width:415px;
+	position:absolute;
+	font-size: 7.5px;
+	text-align: center;
+	border:0px solid black;
+}
