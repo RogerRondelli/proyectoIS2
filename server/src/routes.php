@@ -10,47 +10,9 @@ use Symfony\Component\Process\Process;
 
 
 // Render Twig template in route
-
 $app->get('/', function ($request, $response, $args) {
     return $this->renderer->render($response, 'index.phtml', [
         'name' => 'Escribe algo en la barra de navegacion'
-    ]);
-});
-
-$app->get('/prueba', function ($request, $response, $args) {
-    $id_cat = '213';
-    $id_denuncia = '3';
-    verifyNotification($id_cat,$id_denuncia);
- });
-
-//Logueo Base
-$app->get('/getToken', function(Request $request, Response $response){
-    try
-    {
-        $settings = $this->get('settings'); // get settings array.
-        $option=[
-                    'aud' =>  Aud()
-                ];
-        $token = JWT::encode($option, $settings['jwt']['secret'], "HS256");
-        return $response->withJson(
-                            array(
-                                'response' => '1',
-                                'data'=> array(
-                                        'token' => $token
-                                    )
-                                )
-                        ); 
-    } 
-    catch(PDOException $e)
-    {
-        throw $e;
-        // return $response->withJson(array('response' => '0', 'error' => $e, "data" => array('msg' => 'Error Interno')));  
-    } 
-});
-
-$app->get('/{name}', function ($request, $response, $args) {
-    return $this->renderer->render($response, 'index.phtml', [
-        'name' => $args['name']
     ]);
 });
 
@@ -431,12 +393,21 @@ $app->group('/api', function(\Slim\App $app) {
                         ORDER BY id_proyecto ASC";
 
                 $proyectos = consulta($db,$sql);
+
+                $sql = "SELECT SQL_CALC_FOUND_ROWS u.id_usuario,u.apellido,u.nombre, r.id_proyecto
+                        FROM usuarios u
+                        LEFT JOIN relaciones_usuarios r ON r.id_usuario = u.id_usuario
+                        WHERE u.rol != 1
+                        ORDER BY u.id_usuario ASC";
+
+                $usuarios = consulta($db,$sql);
             
                 return $this->response->withJson([
                                                     'code' => 200,
                                                     'status' => true, 
                                                     'message' => '',
-                                                    'data' => $proyectos
+                                                    'data' => $proyectos,
+                                                    'usuarios' => $usuarios
                                                 ]);
             
             } 
@@ -457,12 +428,25 @@ $app->group('/api', function(\Slim\App $app) {
                 
                 $nombre = $_POST['nombre'];
                 $estado = $_POST['estado'];
+                $id_usuario = $_POST['id_usuario'];
 
-                $sql = "INSERT INTO proyectos (nombre, estado) 
-                                            VALUES
-                                            ('$nombre', '$estado')";
+                $sql = "INSERT INTO proyectos 
+                        (nombre, estado) 
+                        VALUES
+                        ('$nombre', '$estado')";
+
                 $stmt = $db->prepare($sql);
                 $stmt->execute();
+                $id_proyecto = $db->lastInsertId();
+
+                for ($i=0; $i < count($id_usuario); $i++) { 
+                    $sql = "INSERT INTO relaciones_usuarios 
+                            (id_proyecto, id_usuario) 
+                            VALUES
+                            ('$id_proyecto', '$id_usuario[$i]')";
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+                }
             
                 return $this->response->withJson([
                                                     'code' => 200,
@@ -490,6 +474,7 @@ $app->group('/api', function(\Slim\App $app) {
                 $id_proyecto = $_POST['id_proyecto'];
                 $nombre = $_POST['nombre'];
                 $estado = $_POST['estado'];
+                $id_usuario = $_POST['id_usuario'];
 
                 $sql = "UPDATE proyectos SET nombre='$nombre', 
                                         estado='$estado'
@@ -497,6 +482,19 @@ $app->group('/api', function(\Slim\App $app) {
 
                 $stmt = $db->prepare($sql);
                 $stmt->execute();
+
+                $limpiar = "DELETE FROM relaciones_usuarios WHERE id_proyecto = '$id_proyecto'";
+                $stmt = $db->prepare($limpiar);
+                $stmt->execute();
+
+                for ($i=0; $i < count($id_usuario); $i++) { 
+                    $sql = "INSERT INTO relaciones_usuarios 
+                            (id_proyecto, id_usuario) 
+                            VALUES
+                            ('$id_proyecto', '$id_usuario[$i]')";
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+                }
             
                 return $this->response->withJson([
                                                     'code' => 200,
@@ -522,6 +520,10 @@ $app->group('/api', function(\Slim\App $app) {
                 $id_proyecto = $_POST['id_proyecto'];
 
                 $sql = "DELETE FROM proyectos WHERE id_proyecto='$id_proyecto'";
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+                $sql = "DELETE FROM relaciones_usuarios WHERE id_proyecto='$id_proyecto'";
                 $stmt = $db->prepare($sql);
                 $stmt->execute();
             
