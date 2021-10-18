@@ -47,7 +47,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<div class="col-md-3"  style="padding-left:0">
-						<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">Agregar Proyecto</button>
+						<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">Agregar User Storie</button>
 					</div>
 					<div class="col-md-9" id="mensaje"></div>
 
@@ -55,8 +55,8 @@
 						<table class="table table-bordered">
 							<thead>
 								<tr>
-									<th>Nombre del Proyecto</th>
-									<th>Estado</th>
+									<th>Descripcion</th>
+									<th>Backlog</th>
 									<th>Acciones</th>
 								</tr>
 							</thead>
@@ -72,17 +72,17 @@
 
 						<!-- Modal Header -->
 						<div class="modal-header">
-							<h4 class="modal-title">Agregar Proyecto</h4>
+							<h4 class="modal-title">Agregar User Storie</h4>
 						</div>
 
 						<!-- Modal body --> 
 						<div class="modal-body">
-							<table style="width:490; margin:15px auto 0 auto">
+							<table style="width:490px; margin:15px auto 0 auto">
 								<tr>
-									<td align="right" class="labelmodal">Nombre:</td>
-									<td align="left"><input type="text" class="input_medium" id="nombre" autocomplete="off" required></td>
+									<td align="right" class="labelmodal">Descripcion:</td>
+									<td align="left"><textarea id="descripcion" name="descripcion" style="width: -webkit-fill-available;"></textarea></td>
 								</tr>
-								<tr>
+								<!-- <tr>
 									<td align="right" class="labelmodal">Estado:</td>
 									<td align="left">
 										<select class="input_medium" id="estado">
@@ -90,11 +90,11 @@
 											<option value="Cerrado">Cerrado</option>
 										</select>
 									</td>
-								</tr>
+								</tr> -->
 								<tr>
-									<td align="right" class="labelmodal">Usuarios:</td>
+									<td align="right" class="labelmodal">Backlog:</td>
 									<td align="left">
-										<select class="input_medium" id="id_usuario" multiple="multiple">
+										<select class="input_medium" id="id_backlog">
 											<option value=""> - </option>
 										</select>
 									</td>
@@ -107,7 +107,7 @@
 
 						<!-- Modal footer -->
 						<div class="modal-footer">
-							<button type="button" class="btn btn-success btn-sm" id="guardar_registro">Guardar</button>
+							<button type="button" class="btn btn-success btn-sm" onclick="guardar()">Guardar</button>
 							<button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
 						</div>
 
@@ -121,20 +121,18 @@
 
 						<!-- Modal Header -->
 						<div class="modal-header">
-							<h4 class="modal-title">Editar Proyecto</h4>
+							<h4 class="modal-title">Editar User Storie</h4>
 						</div>
 
 						<!-- Modal body --> 
 						<div class="modal-body">
-							<table style="width:490; margin:15px auto 0 auto">
+							<table style="width:490px; margin:15px auto 0 auto">
 								<tr>
 									<td align="right" class="labelmodal">Nombre:</td>
-									<td align="left">
-										<input type="hidden" id="id_proyecto">
-										<input class="input_medium" id="nombre_editar" autocomplete="off" required>
-									</td>
+                                    <input type="hidden" id="id_user_storie">
+                                    <td align="left"><textarea id="descripcion_editar" name="descripcion_editar" style="width:-webkit-fill-available;"></textarea></td>
 								</tr>
-								<tr>
+								<!-- <tr>
 									<td align="right" class="labelmodal">Estado:</td>
 									<td align="left">
 										<select class="input_medium" id="estado_editar">
@@ -142,11 +140,11 @@
 											<option value="Cerrado">Cerrado</option>
 										</select>
 									</td>
-								</tr>
+								</tr> -->
 								<tr>
-									<td align="right" class="labelmodal">Usuarios:</td>
+									<td align="right" class="labelmodal">Backlog:</td>
 									<td align="left">
-										<select class="input_medium" id="id_usuario_editar" multiple="multiple">
+										<select class="input_medium" id="id_backlog_editar">
 											<option value=""> - </option>
 										</select>
 									</td>
@@ -159,7 +157,7 @@
 
 						<!-- Modal footer -->
 						<div class="modal-footer">
-							<button type="button" class="btn btn-success btn-sm" id="guardar_editar">Editar</button>
+							<button type="button" class="btn btn-success btn-sm" onclick="guardarEditar()">Editar</button>
 							<button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
 						</div>
 
@@ -193,97 +191,45 @@
 	</div>
 
 	<script type="text/javascript">
-		var proyectos;
+		var backlogs;
         $(document).ready(function () {
 			tabla();
-			$('#id_usuario').select2();
-			$('#id_usuario_editar').select2();
-
-            $("#guardar_editar").click(function (event) {
-				let data = {
-					id_proyecto: $('#id_proyecto').val(),
-					nombre: $('#nombre_editar').val(),
-					id_usuario: $('#id_usuario_editar').val(),
-					estado: $('#estado_editar option:selected').val()
-				};
-
-				console.log(data)
-				// return false
-               
-				$.ajax({
-					dataType: 'json',
-					async: false,
-					url: '../server/public/api/proyectos/edit',
-					type: 'POST',
-					data: data,
-					success: function (data, status, xhr) {
-						console.log(data.data.length)
-						location.reload();
-					},
-					error: function (xhr) {
-						$("#mensaje").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
-					}
-
-				});
-            });
-			
-			$("#guardar_registro").click(function (event) {
-				let datas = {
-					nombre: $('#nombre').val(),
-					estado: $('#estado').val(),
-					id_usuario: $('#id_usuario').val()
-				} 
-
-				if (nombre == '') {
-					$("#msjRegistro").html(alertDismissJS("Escriba el nombre del proyecto", 'error'));
-					return false
-				}
-				console.log(datas)
-				// return false
-				$.ajax({
-                    dataType: 'html',
-					async: false,
-					url: '../server/public/api/proyectos/create',
-                    type: 'POST', 
-                    data: datas,
-                    success: function (data, status, xhr) {
-						console.log(data);
-						location.reload();
-                    },
-					error: function (xhr) {
-						$("#msjRegistro").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
-					}
-                });
-			});
         });
 		
-		var usuarios;
+		var backlogs;
 		function tabla(){
-			let html = '';
+			let html = '',
+				options = '<option value=""> - </option>';
 			$.ajax({
 				dataType: 'json',
 				async: false,
-				url: '../server/public/api/proyectos/list',
+				url: '../server/public/api/userstories/list',
 				type: 'GET',
 				success: function (data, status, xhr) {
 					console.log(data)
-					let datos = data.data;
-					usuarios = data.usuarios;
-					proyectos = datos;
-					for (let index = 0; index < datos.length; index++) {
-						let element = datos[index];
+					let user_stories = data.user_stories;
+					backlogs = data.backlogs;
+					for (let index = 0; index < user_stories.length; index++) {
+						let element = user_stories[index];
 						html += `<tr>
+									<td>`+element['descripcion']+`</td>
 									<td>`+element['nombre']+`</td>
-									<td>`+element['estado']+`</td>
 									<td>
 										<div style="text-align:center;font-size:18px;margin-top:10px"> 
-											<span class="glyphicon glyphicon-pencil mouse-pointer btn-md btn-grid" style="cursor:pointer" title="Editar" onclick="editar(`+element['id_proyecto']+`)" ></span>
-											<span class="glyphicon glyphicon-trash mouse-pointer btn-md btn-grid" style="cursor:pointer" onclick="preguntaBorrado(`+element['id_proyecto']+`)" title="Borrar"></span>
+											<span class="glyphicon glyphicon-pencil mouse-pointer btn-md btn-grid" style="cursor:pointer" title="Editar" onclick="editar(`+element['id_user_storie']+`)" ></span>
+											<span class="glyphicon glyphicon-trash mouse-pointer btn-md btn-grid" style="cursor:pointer" onclick="preguntaBorrado(`+element['id_user_storie']+`)" title="Borrar"></span>
 										</div>
 									</td>
 								</tr>`
 					}
+
+					for (let index = 0; index < backlogs.length; index++) {
+						let element = backlogs[index];
+						options += `<option value="`+element.id_backlog+`"> `+element.nombre+` </option>`;
+					}
+
 					$('#tableBody').html(html);
+					$('#id_backlog').html(options);
 					lista_usuario(usuarios)
 				},
 				error: function (xhr) {
@@ -291,6 +237,62 @@
 					$("#mensaje").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
 				}
 
+			});
+		}
+
+		function guardar(){
+			let datas = {
+				descripcion: $('#descripcion').val(),
+				// estado: $('#estado').val(),
+				id_backlog: $('#id_backlog').val()
+			} 
+
+			if (descripcion == '') {
+				$("#msjRegistro").html(alertDismissJS("Escriba la descripcion del user storie", 'error'));
+				return false
+			}
+			console.log(datas)
+			// return false
+			$.ajax({
+				dataType: 'html',
+				async: false,
+				url: '../server/public/api/userstories/create',
+				type: 'POST', 
+				data: datas,
+				success: function (data, status, xhr) {
+					console.log(data);
+					location.reload();
+				},
+				error: function (xhr) {
+					$("#msjRegistro").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
+				}
+			});
+		}
+
+		function guardarEditar(){
+			let data = {
+				id_backlog: $('#id_backlog').val(),
+				nombre: $('#nombre_editar').val(),
+				id_proyecto: $('#id_proyecto_editar').val(),
+				estado: $('#estado_editar').val()
+			};
+
+			console.log(data)
+			// return false
+			
+			$.ajax({
+				dataType: 'json',
+				async: false,
+				url: '../server/public/api/userstories/edit',
+				type: 'POST',
+				data: data,
+				success: function (data, status, xhr) {
+					console.log(data.data.length)
+					location.reload();
+				},
+				error: function (xhr) {
+					$("#mensaje").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
+				}
 			});
 		}
 
@@ -319,27 +321,41 @@
 		}
 
 		function editar(id) {
-			var lista = [];
-			for(let k=0;k < usuarios.length; k++){
-				let element = usuarios[k];
-				if(id == element['id_proyecto']){
-					lista.push(element['id_usuario'])
+			$.ajax({
+				dataType: 'json',
+				async: false,
+				url: '../server/public/api/userstorie/list',
+				type: 'POST', 
+				data: {id:id},
+				success: function (data, status, xhr) {
+					console.log(data,backlogs);
+					let user_stories = data.user_stories[0];
+
+					$("#descripcion_editar").val(user_stories.descripcion);
+					$("#id_backlog").val(user_stories.id_backlog);
+					$("#id_user_storie").val(user_stories.id_user_storie);
+
+					let options = '<option> - </option>';
+					for(let k=0;k < backlogs.length; k++){
+						let element = backlogs[k];
+						let selected = '';
+
+						if(element.id_backlog == user_stories.id_backlog){
+							selected = 'selected';
+						}
+
+						console.log(element.id_backlog,user_stories.id_backlog)
+						options += '<option '+selected+' value="'+element.id_backlog+'">'+element.nombre+'</option>'
+					}
+
+					$("#id_backlog_editar").html(options);
+					$('#modalEditar').modal();
+				},
+				error: function (xhr) {
+					$("#msjRegistro").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
 				}
-			}
+			});
 
-			console.log('lista',lista)
-
-			for (let i = 0; i < proyectos.length; i++) {
-				if (id == proyectos[i]['id_proyecto']) {
-					let element = proyectos[i];
-					$("#nombre_editar").val(element.nombre);
-					$("#estado_editar").val(element.estado);
-					$("#id_proyecto").val(element.id_proyecto);
-					$("#id_usuario_editar").val(lista).trigger('change');
-				}
-			}
-
-			$('#modalEditar').modal();
 		}
 
 		function preguntaBorrado(id){
@@ -349,14 +365,14 @@
 		}
 
 		function confirmarBorrado(){
-			let id_proyecto = $("#id_eliminar").val();
+			let id_backlog = $("#id_eliminar").val();
 
 			$.ajax({
 				dataType: 'html',
 				type: 'POST',
-				url: '../server/public/api/proyectos/delete',
+				url: '../server/public/api/userstories/delete',
 				cache: false,
-				data: {id_proyecto: id_proyecto},
+				data: {id_backlog: id_backlog},
 				beforeSend: function(){
 					$("#mensaje_eliminar").html("<img src='images/progress_bar.gif'>");
 				},
