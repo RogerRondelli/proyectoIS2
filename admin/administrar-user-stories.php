@@ -57,6 +57,7 @@
 								<tr>
 									<th>Descripcion</th>
 									<th>Backlog</th>
+									<th>Usuario</th>
 									<th>Acciones</th>
 								</tr>
 							</thead>
@@ -82,15 +83,14 @@
 									<td align="right" class="labelmodal">Descripcion:</td>
 									<td align="left"><textarea id="descripcion" name="descripcion" style="width: -webkit-fill-available;"></textarea></td>
 								</tr>
-								<!-- <tr>
-									<td align="right" class="labelmodal">Estado:</td>
+								<tr>
+									<td align="right" class="labelmodal">Usuario:</td>
 									<td align="left">
-										<select class="input_medium" id="estado">
-											<option value="Abierto">Abierto</option>
-											<option value="Cerrado">Cerrado</option>
+										<select class="input_medium" id="id_usuario">
+											<option value=""> - </option>
 										</select>
 									</td>
-								</tr> -->
+								</tr>
 								<tr>
 									<td align="right" class="labelmodal">Backlog:</td>
 									<td align="left">
@@ -132,15 +132,14 @@
                                     <input type="hidden" id="id_user_storie">
                                     <td align="left"><textarea id="descripcion_editar" name="descripcion_editar" style="width:-webkit-fill-available;"></textarea></td>
 								</tr>
-								<!-- <tr>
+								<tr>
 									<td align="right" class="labelmodal">Estado:</td>
 									<td align="left">
-										<select class="input_medium" id="estado_editar">
-                                            <option value="Abierto">Abierto</option>
-											<option value="Cerrado">Cerrado</option>
+										<select class="input_medium" id="id_usuario_editar">
+                                            <option value=""> - </option>
 										</select>
 									</td>
-								</tr> -->
+								</tr>
 								<tr>
 									<td align="right" class="labelmodal">Backlog:</td>
 									<td align="left">
@@ -209,11 +208,13 @@
 					console.log(data)
 					let user_stories = data.user_stories;
 					backlogs = data.backlogs;
+					let usuarios = data.usuarios;
 					for (let index = 0; index < user_stories.length; index++) {
 						let element = user_stories[index];
 						html += `<tr>
 									<td>`+element['descripcion']+`</td>
 									<td>`+element['nombre']+`</td>
+									<td>`+element['nombre_usuario']+ ' ' +element['apellido']+`</td>
 									<td>
 										<div style="text-align:center;font-size:18px;margin-top:10px"> 
 											<span class="glyphicon glyphicon-pencil mouse-pointer btn-md btn-grid" style="cursor:pointer" title="Editar" onclick="editar(`+element['id_user_storie']+`)" ></span>
@@ -243,7 +244,7 @@
 		function guardar(){
 			let datas = {
 				descripcion: $('#descripcion').val(),
-				// estado: $('#estado').val(),
+				id_usuario: $('#id_usuario').val(),
 				id_backlog: $('#id_backlog').val()
 			} 
 
@@ -272,9 +273,9 @@
 		function guardarEditar(){
 			let data = {
 				id_backlog: $('#id_backlog').val(),
-				nombre: $('#nombre_editar').val(),
-				id_proyecto: $('#id_proyecto_editar').val(),
-				estado: $('#estado_editar').val()
+				descripcion: $('#descripcion_editar').val(),
+				id_user_storie: $('#id_user_storie').val(),
+				id_usuario: $('#id_usuario_editar').val()
 			};
 
 			console.log(data)
@@ -309,11 +310,11 @@
 		}
 
 		function lista_usuario(data){
-			let lista = eliminarDuplicados(data)
+			// let lista = eliminarDuplicados(data)
 			let options = '<option value=""> - </option>';
-			for (let index = 0; index < lista.length; index++) {
-				let element = lista[index];
-				let nombre_apellido = element['nombre'] + element['apellido'];
+			for (let index = 0; index < data.length; index++) {
+				let element = data[index];
+				let nombre_apellido = element['nombre'] + ' ' + element['apellido'];
 				options += `<option value="`+element['id_usuario']+`">`+nombre_apellido+`</option>`;
 			}
 			
@@ -334,6 +335,7 @@
 					$("#descripcion_editar").val(user_stories.descripcion);
 					$("#id_backlog").val(user_stories.id_backlog);
 					$("#id_user_storie").val(user_stories.id_user_storie);
+					$("#id_usuario_editar").val(user_stories.id_usuario);
 
 					let options = '<option> - </option>';
 					for(let k=0;k < backlogs.length; k++){
@@ -365,14 +367,14 @@
 		}
 
 		function confirmarBorrado(){
-			let id_backlog = $("#id_eliminar").val();
+			let id_user_storie = $("#id_eliminar").val();
 
 			$.ajax({
 				dataType: 'html',
 				type: 'POST',
 				url: '../server/public/api/userstories/delete',
 				cache: false,
-				data: {id_backlog: id_backlog},
+				data: {id_user_storie: id_user_storie},
 				beforeSend: function(){
 					$("#mensaje_eliminar").html("<img src='images/progress_bar.gif'>");
 				},

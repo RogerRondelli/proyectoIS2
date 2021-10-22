@@ -394,10 +394,54 @@ $app->group('/api', function(\Slim\App $app) {
 
                 $proyectos = consulta($db,$sql);
 
-                $sql = "SELECT SQL_CALC_FOUND_ROWS u.id_usuario,u.apellido,u.nombre, r.id_proyecto
+                $sql = "SELECT u.id_usuario,u.apellido,u.nombre, r.id_proyecto
                         FROM usuarios u
                         LEFT JOIN relaciones_usuarios r ON r.id_usuario = u.id_usuario
-                        WHERE u.rol != 1
+                        WHERE u.rol != 1 AND u.id_usuario NOT IN (SELECT id_usuario
+                                            FROM relaciones_usuarios)
+                        ORDER BY u.id_usuario ASC";
+
+                $usuarios = consulta($db,$sql);
+            
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'data' => $proyectos,
+                                                    'usuarios' => $usuarios
+                                                ]);
+            
+            } 
+            catch(PDOException $e)
+            {
+                return json_encode( array( 
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e ) 
+                                        );
+            }
+        });
+
+        $app->post('/proyecto/list', function(Request $request, Response $response){
+            try {
+                $db = $this->db;
+
+                $id = $_POST['id'];
+
+                $sql = "SELECT p.id_proyecto, p.nombre, p.estado, u.id_usuario
+                        FROM proyectos p
+                        LEFT JOIN usuarios u ON u.id_proyecto = p.id_proyecto
+                        WHERE p.id_proyecto = $id
+                        ORDER BY p.id_proyecto ASC";
+
+                $proyectos = consulta($db,$sql);
+
+                $sql = "SELECT u.id_usuario,u.apellido,u.nombre, r.id_proyecto
+                        FROM usuarios u
+                        LEFT JOIN relaciones_usuarios r ON r.id_usuario = u.id_usuario
+                        WHERE u.rol != 1 AND u.id_usuario NOT IN (SELECT id_usuario
+                                            FROM relaciones_usuarios) OR u.id_proyecto = $id
                         ORDER BY u.id_usuario ASC";
 
                 $usuarios = consulta($db,$sql);
@@ -483,18 +527,11 @@ $app->group('/api', function(\Slim\App $app) {
                 $stmt = $db->prepare($sql);
                 $stmt->execute();
 
-                $limpiar = "DELETE FROM relaciones_usuarios WHERE id_proyecto = '$id_proyecto'";
-                $stmt = $db->prepare($limpiar);
-                $stmt->execute();
+                $sql = "UPDATE usuarios SET id_proyecto='$id_proyecto', 
+                        WHERE id_usuario=$id_usuario";
 
-                for ($i=0; $i < count($id_usuario); $i++) { 
-                    $sql = "INSERT INTO relaciones_usuarios 
-                            (id_proyecto, id_usuario) 
-                            VALUES
-                            ('$id_proyecto', '$id_usuario[$i]')";
-                    $stmt = $db->prepare($sql);
-                    $stmt->execute();
-                }
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
             
                 return $this->response->withJson([
                                                     'code' => 200,
@@ -914,173 +951,184 @@ $app->group('/api', function(\Slim\App $app) {
         });
 
     //USERSTURY
-    $app->get('/userstories/list', function(Request $request, Response $response){
-        try {
-            $db = $this->db;
+        $app->get('/userstories/list', function(Request $request, Response $response){
+            try {
+                $db = $this->db;
 
-            $sql = "SELECT *
-                    FROM user_stories us
-                    JOIN backlogs b ON b.id_backlog = us.id_backlog
-                    ORDER BY us.id_user_storie ASC";
+                $sql = "SELECT us.descripcion, us.id_user_storie, b.nombre, u.nombre as nombre_usuario, u.apellido
+                        FROM user_stories us
+                        JOIN backlogs b ON b.id_backlog = us.id_backlog
+                        JOIN usuarios u ON u.id_usuario = us.id_usuario
+                        ORDER BY us.id_user_storie ASC";
 
-            $user_stories = consulta($db,$sql);
+                $user_stories = consulta($db,$sql);
 
-            $sql = "SELECT *
-                    FROM backlogs
-                    ORDER BY id_backlog ASC";
+                $sql = "SELECT *
+                        FROM backlogs
+                        ORDER BY id_backlog ASC";
 
-            $backlogs = consulta($db,$sql);
+                $backlogs = consulta($db,$sql);
 
-            return $this->response->withJson([
-                                                'code' => 200,
-                                                'status' => true, 
-                                                'message' => '',
-                                                'user_stories' => $user_stories,
-                                                'backlogs' => $backlogs,
-                                            ]);
-        } 
-        catch(PDOException $e)
-        { 
-            return json_encode( array( 
-                                        'code' => 505, 
-                                        'status' => false, 
-                                        'message' => '',
-                                        'data' => $e ) 
-                                    );
-        }
-    });
+                $sql = "SELECT *
+                        FROM usuarios
+                        ORDER BY id_usuario ASC";
 
-    $app->post('/userstorie/list', function(Request $request, Response $response){
-        try {
-            $id = $_POST['id'];
-            $db = $this->db;
+                $usuarios = consulta($db,$sql);
 
-            $sql = "SELECT *
-                    FROM user_stories us
-                    JOIN backlogs b ON b.id_backlog = us.id_backlog
-                    WHERE us.id_user_storie = $id
-                    ORDER BY us.id_user_storie ASC";
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'user_stories' => $user_stories,
+                                                    'backlogs' => $backlogs,
+                                                    'usuarios' => $usuarios,
+                                                ]);
+            } 
+            catch(PDOException $e)
+            { 
+                return json_encode( array( 
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e ) 
+                                        );
+            }
+        });
 
-            $user_stories = consulta($db,$sql);
+        $app->post('/userstorie/list', function(Request $request, Response $response){
+            try {
+                $id = $_POST['id'];
+                $db = $this->db;
 
-            $sql = "SELECT *
-                    FROM backlogs
-                    ORDER BY id_backlog ASC";
+                $sql = "SELECT *
+                        FROM user_stories us
+                        JOIN backlogs b ON b.id_backlog = us.id_backlog
+                        WHERE us.id_user_storie = $id
+                        ORDER BY us.id_user_storie ASC";
 
-            $backlogs = consulta($db,$sql);
+                $user_stories = consulta($db,$sql);
 
-            return $this->response->withJson([
-                                                'code' => 200,
-                                                'status' => true, 
-                                                'message' => '',
-                                                'user_stories' => $user_stories,
-                                                'backlogs' => $backlogs,
-                                            ]);
-        } 
+                $sql = "SELECT *
+                        FROM backlogs
+                        ORDER BY id_backlog ASC";
 
-        catch(PDOException $e)
-        {
-            return json_encode( array( 
-                                        'code' => 505, 
-                                        'status' => false, 
-                                        'message' => '',
-                                        'data' => $e ) 
-                                    );
-        }
-    });
+                $backlogs = consulta($db,$sql);
 
-    $app->post('/userstories/create', function(Request $request, Response $response){
-        try {
-            $db = $this->db;
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'user_stories' => $user_stories,
+                                                    'backlogs' => $backlogs,
+                                                ]);
+            } 
+
+            catch(PDOException $e)
+            {
+                return json_encode( array( 
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e ) 
+                                        );
+            }
+        });
+
+        $app->post('/userstories/create', function(Request $request, Response $response){
+            try {
+                $db = $this->db;
+                
+                $descripcion = $_POST['descripcion'];
+                $id_backlog = $_POST['id_backlog'];
+                $id_usuario = $_POST['id_usuario'];
+
+                $sql = "INSERT INTO user_stories (descripcion, id_backlog, id_usuario) 
+                                            VALUES
+                                            ('$descripcion', '$id_backlog', '$id_usuario')";
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
             
-            $descripcion = $_POST['descripcion'];
-            $id_backlog = $_POST['id_backlog'];
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'data' => ''
+                                                ]);
+            } 
+            catch(PDOException $e)
+            {
+                return json_encode( array( 
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e ) 
+                                        );
+            }
+        });
 
-            $sql = "INSERT INTO user_stories (descripcion, id_backlog) 
-                                        VALUES
-                                        ('$descripcion', '$id_backlog')";
-            $stmt = $db->prepare($sql);
-            $stmt->execute();
-        
-            return $this->response->withJson([
-                                                'code' => 200,
-                                                'status' => true, 
-                                                'message' => '',
-                                                'data' => ''
-                                            ]);
-        } 
-        catch(PDOException $e)
-        {
-            return json_encode( array( 
-                                        'code' => 505, 
-                                        'status' => false, 
-                                        'message' => '',
-                                        'data' => $e ) 
-                                    );
-        }
-    });
+        $app->post('/userstories/edit', function(Request $request, Response $response){
+            try {
+                $db = $this->db;
+                
+                $id_user_storie = $_POST['id_user_storie'];
+                $descripcion = $_POST['descripcion'];
+                $id_backlog = $_POST['id_backlog'];
+                $id_usuario = $_POST['id_usuario'];
 
-    $app->post('/userstories/edit', function(Request $request, Response $response){
-        try {
-            $db = $this->db;
+                $sql = "UPDATE user_stories SET descripcion='$descripcion', 
+                                        id_backlog='$id_backlog',
+                                        id_usuario='$id_usuario'
+                        WHERE id_user_storie='$id_user_storie'";
+
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'data' => ''
+                                                ]);
+            } 
+            catch(PDOException $e)
+            {
+                return json_encode( array( 
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e ) 
+                                        );
+            }
+        });
+
+        $app->post('/userstories/delete', function(Request $request, Response $response){
+            try {
+                $db = $this->db;
+                $id_user_storie = $_POST['id_user_storie'];
+
+                $sql = "DELETE FROM user_stories WHERE id_user_storie = $id_user_storie";
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+                // $sql = "DELETE FROM relaciones WHERE id_backlog='$id_backlog'";
+                // $stmt = $db->prepare($sql);
+                // $stmt->execute();
             
-            $id_user_storie = $_POST['id_user_storie'];
-            $descripcion = $_POST['descripcion'];
-            $id_backlog = $_POST['id_backlog'];
-
-            $sql = "UPDATE user_stories SET descripcion='$descripcion', 
-                                    id_backlog='$id_backlog'
-                    WHERE id_user_storie='$id_user_storie'";
-
-            $stmt = $db->prepare($sql);
-            $stmt->execute();
-
-            return $this->response->withJson([
-                                                'code' => 200,
-                                                'status' => true, 
-                                                'message' => '',
-                                                'data' => ''
-                                            ]);
-        } 
-        catch(PDOException $e)
-        {
-            return json_encode( array( 
-                                        'code' => 505, 
-                                        'status' => false, 
-                                        'message' => '',
-                                        'data' => $e ) 
-                                    );
-        }
-    });
-
-    $app->post('/userstories/delete', function(Request $request, Response $response){
-        try {
-            $db = $this->db;
-            $id_user_storie = $_POST['id_user_storie'];
-
-            $sql = "DELETE FROM user_stories WHERE id_user_storie = $id_user_storie";
-            $stmt = $db->prepare($sql);
-            $stmt->execute();
-
-            // $sql = "DELETE FROM relaciones WHERE id_backlog='$id_backlog'";
-            // $stmt = $db->prepare($sql);
-            // $stmt->execute();
-        
-            return $this->response->withJson([
-                                                'code' => 200,
-                                                'status' => true, 
-                                                'message' => '',
-                                                'data' => ''
-                                            ]);
-        } 
-        catch(PDOException $e)
-        {
-            return json_encode( array( 
-                                        'code' => 505, 
-                                        'status' => false, 
-                                        'message' => '',
-                                        'data' => $e ) 
-                                    );
-        }
-    });
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'data' => ''
+                                                ]);
+            } 
+            catch(PDOException $e)
+            {
+                return json_encode( array( 
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e ) 
+                                        );
+            }
+        });
 });

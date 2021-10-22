@@ -307,10 +307,10 @@
 		}
 
 		function lista_usuario(data){
-			let lista = eliminarDuplicados(data)
+			// let lista = eliminarDuplicados(data)
 			let options = '<option value=""> - </option>';
-			for (let index = 0; index < lista.length; index++) {
-				let element = lista[index];
+			for (let index = 0; index < data.length; index++) {
+				let element = data[index];
 				let nombre_apellido = element['nombre'] + element['apellido'];
 				options += `<option value="`+element['id_usuario']+`">`+nombre_apellido+`</option>`;
 			}
@@ -319,27 +319,66 @@
 		}
 
 		function editar(id) {
-			var lista = [];
-			for(let k=0;k < usuarios.length; k++){
-				let element = usuarios[k];
-				if(id == element['id_proyecto']){
-					lista.push(element['id_usuario'])
+			console.log(id)
+			// var lista = [];
+			// for(let k=0;k < usuarios.length; k++){
+			// 	let element = usuarios[k];
+			// 	if(id == element['id_proyecto']){
+			// 		lista.push(element['id_usuario'])
+			// 	}
+			// }
+
+			// console.log('lista',lista)
+
+			// for (let i = 0; i < proyectos.length; i++) {
+			// 	if (id == proyectos[i]['id_proyecto']) {
+			// 		let element = proyectos[i];
+			// 		$("#nombre_editar").val(element.nombre);
+			// 		$("#estado_editar").val(element.estado);
+			// 		$("#id_proyecto").val(element.id_proyecto);
+			// 		$("#id_usuario_editar").val(lista).trigger('change');
+			// 	}
+			// }
+
+			// $('#modalEditar').modal();
+
+			$.ajax({
+				dataType: 'json',
+				async: false,
+				url: '../server/public/api/proyecto/list',
+				type: 'POST', 
+				data: {id:id},
+				success: function (data, status, xhr) {
+					console.log(data);
+					let datas = data.data[0],
+						usuarios = data.usuarios;
+
+					$("#nombre_editar").val(datas.nombre);
+					$("#estado_editar").val(datas.estado);
+					$("#id_proyecto").val(datas.id_proyecto);
+
+					let options = '<option> - </option>';
+					for(let k=0;k < usuarios.length; k++){
+						let element = usuarios[k];
+						let selected = '';
+
+						if(datas.id_usuario == datas.id_usuario){
+							selected = 'selected';
+						}
+
+						console.log(datas.id_usuario,datas.id_usuario)
+						options += '<option '+selected+' value="'+element.id_usuario+'">'+element.nombre+ ' '+element.apellido+'</option>'
+					}
+
+					$("#id_usuario_editar").html(options);
+					$("#id_usuario_editar").val(datas.id_usuario).trigger('change');
+					$('#modalEditar').modal();
+				},
+				error: function (xhr) {
+					console.log(xhr)
+					$("#msjRegistro").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
 				}
-			}
-
-			console.log('lista',lista)
-
-			for (let i = 0; i < proyectos.length; i++) {
-				if (id == proyectos[i]['id_proyecto']) {
-					let element = proyectos[i];
-					$("#nombre_editar").val(element.nombre);
-					$("#estado_editar").val(element.estado);
-					$("#id_proyecto").val(element.id_proyecto);
-					$("#id_usuario_editar").val(lista).trigger('change');
-				}
-			}
-
-			$('#modalEditar').modal();
+			});
 		}
 
 		function preguntaBorrado(id){
