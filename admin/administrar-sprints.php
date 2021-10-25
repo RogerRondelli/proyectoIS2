@@ -1,7 +1,5 @@
 <?php
 	include ("inc/funciones.php");
-	// un comentario
-	//$pag = basename($_SERVER['PHP_SELF']);
 	verificaLogin();
 ?>
 
@@ -47,7 +45,7 @@
 			<div class="row">
 				<div class="col-md-12">
 					<div class="col-md-3"  style="padding-left:0">
-						<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">Agregar Backlog</button>
+						<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">Agregar Sprint</button>
 					</div>
 					<div class="col-md-9" id="mensaje"></div>
 
@@ -55,9 +53,10 @@
 						<table class="table table-bordered">
 							<thead>
 								<tr>
-									<th>Nombre</th>
-									<th>Estado</th>
 									<th>Proyecto</th>
+									<th>Fecha Inicio</th>
+									<th>Fecha Fin</th>
+									<th>Estado</th>
 									<th>Acciones</th>
 								</tr>
 							</thead>
@@ -73,31 +72,32 @@
 
 						<!-- Modal Header -->
 						<div class="modal-header">
-							<h4 class="modal-title">Agregar Backlog</h4>
+							<h4 class="modal-title">Agregar Sprint</h4>
 						</div>
 
 						<!-- Modal body --> 
 						<div class="modal-body">
 							<table style="width:490; margin:15px auto 0 auto">
 								<tr>
-									<td align="right" class="labelmodal">Nombre:</td>
-									<td align="left"><input type="text" class="input_medium" id="nombre" autocomplete="off" required></td>
-								</tr>
-								<tr>
-									<td align="right" class="labelmodal">Estado:</td>
+									<td align="right" class="labelmodal">Proyecto:</td>
 									<td align="left">
-										<select class="input_medium" id="estado">
-											<option value="Abierto">Abierto</option>
-											<option value="Cerrado">Cerrado</option>
+										<select class="input_medium" id="id_proyecto" onchange="listar(this);">
+											<option value=""> - </option>
 										</select>
 									</td>
 								</tr>
 								<tr>
-									<td align="right" class="labelmodal">Proyecto:</td>
+									<td align="right" class="labelmodal">US:</td>
 									<td align="left">
-										<select class="input_medium" id="id_proyecto">
+										<select class="input_medium" id="id_user_storie" multiple="multiple">
 											<option value=""> - </option>
 										</select>
+									</td>
+								</tr>
+								<tr>
+									<td align="right" class="labelmodal">Fecha fin (2 semanas por defecto):</td>
+									<td align="left">
+										<input type="date" id="fecha_fin" name="trip-start">
 									</td>
 								</tr>
 								<tr>
@@ -122,34 +122,33 @@
 
 						<!-- Modal Header -->
 						<div class="modal-header">
-							<h4 class="modal-title">Editar Backlog</h4>
+							<h4 class="modal-title">Editar Sprint</h4>
 						</div>
 
 						<!-- Modal body --> 
 						<div class="modal-body">
 							<table style="width:490; margin:15px auto 0 auto">
 								<tr>
-									<td align="right" class="labelmodal">Nombre:</td>
+									<td align="right" class="labelmodal">Proyecto:</td>
 									<td align="left">
-										<input type="hidden" id="id_backlog">
-										<input class="input_medium" id="nombre_editar" autocomplete="off" required>
-									</td>
-								</tr>
-								<tr>
-									<td align="right" class="labelmodal">Estado:</td>
-									<td align="left">
-										<select class="input_medium" id="estado_editar">
-                                            <option value="Abierto">Abierto</option>
-											<option value="Cerrado">Cerrado</option>
-										</select>
-									</td>
-								</tr>
-								<tr>
-									<td align="right" class="labelmodal">Proyectos:</td>
-									<td align="left">
-										<select class="input_medium" id="id_proyecto_editar">
+										<input type="hidden" id="id_sprint">
+										<select class="input_medium" id="id_proyecto_editar" onchange="listar(this,'_editar');">
 											<option value=""> - </option>
 										</select>
+									</td>
+								</tr>
+								<tr>
+									<td align="right" class="labelmodal">US:</td>
+									<td align="left">
+										<select class="input_medium" id="id_user_storie_editar" multiple="multiple">
+											<option value=""> - </option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td align="right" class="labelmodal">Fecha fin (2 semanas por defecto):</td>
+									<td align="left">
+										<input type="date" id="fecha_fin_editar" name="trip-start">
 									</td>
 								</tr>
 								<tr>
@@ -194,10 +193,23 @@
 	</div>
 
 	<script type="text/javascript">
-		var backlogs;
+		Date.prototype.addDays = function(days) {
+			var date = new Date(this.valueOf());
+			date.setDate(date.getDate() + days);
+			return date;
+		}
+
         $(document).ready(function () {
 			tabla();
+			var date = new Date(),
+				date = date.addDays(14),
+				date = date.toISOString().substr(0, 10);
+			console.log('asdasdasd',date)
 
+			$('#fecha_fin').val(date)
+
+			$('#id_user_storie').select2();
+			$('#id_user_storie_editar').select2();
             $("#guardar_editar").click(function (event) {
 				let data = {
 					id_proyecto: $('#id_proyecto').val(),
@@ -212,7 +224,7 @@
 				$.ajax({
 					dataType: 'json',
 					async: false,
-					url: '../server/public/api/backlogs/edit',
+					url: '../server/public/api/sprints/edit',
 					type: 'POST',
 					data: data,
 					success: function (data, status, xhr) {
@@ -242,7 +254,7 @@
 				$.ajax({
                     dataType: 'html',
 					async: false,
-					url: '../server/public/api/backlogs/create',
+					url: '../server/public/api/sprints/create',
                     type: 'POST', 
                     data: datas,
                     success: function (data, status, xhr) {
@@ -256,31 +268,31 @@
 			});
         });
 		
-		var proyectos;
 		function tabla(){
 			let html = '',
 				options = '<option value=""> - </option>';
 			$.ajax({
 				dataType: 'json',
 				async: false,
-				url: '../server/public/api/backlogs/list',
+				url: '../server/public/api/sprints/list',
 				type: 'GET',
 				success: function (data, status, xhr) {
 					console.log(data)
-					let datos = data.data;
-					proyectos = data.proyectos;
-					usuarios = data.usuarios;
-					backlogs = datos;
-					for (let index = 0; index < datos.length; index++) {
-						let element = datos[index];
+					let proyectos = data.proyectos,
+						sprints = data.sprints;
+
+					for (let index = 0; index < sprints.length; index++) {
+						let element = sprints[index];
 						html += `<tr>
 									<td>`+element['nombre']+`</td>
+									<td>`+element['fecha_inicio']+`</td>
+									<td>`+element['fecha_fin']+`</td>
 									<td>`+element['estado']+`</td>
-									<td>`+element['nombre_proyecto']+`</td>
 									<td>
 										<div style="text-align:center;font-size:18px;margin-top:10px"> 
-											<span class="glyphicon glyphicon-pencil mouse-pointer btn-md btn-grid" style="cursor:pointer" title="Editar" onclick="editar(`+element['id_backlog']+`)" ></span>
-											<span class="glyphicon glyphicon-trash mouse-pointer btn-md btn-grid" style="cursor:pointer" onclick="preguntaBorrado(`+element['id_backlog']+`)" title="Borrar"></span>
+											<span class="glyphicon glyphicon-pencil mouse-pointer btn-md btn-grid" style="cursor:pointer" title="Editar" onclick="editar(`+element['id_sprint']+`)" ></span>
+											<span class="glyphicon glyphicon-trash mouse-pointer btn-md btn-grid" style="cursor:pointer" onclick="preguntaBorrado(`+element['id_sprint']+`)" title="Borrar"></span>
+											<span class="glyphicon glyphicon-list-alt mouse-pointer btn-md btn-grid" style="cursor:pointer" onclick="iniciarSprint(`+element['id_sprint']+`)" title="Inicializar Sprint"></span>
 										</div>
 									</td>
 								</tr>`
@@ -293,7 +305,6 @@
 
 					$('#tableBody').html(html);
 					$('#id_proyecto').html(options);
-					lista_usuario(usuarios)
 				},
 				error: function (xhr) {
 					console.log(xhr)
@@ -315,21 +326,51 @@
 			}
 		}
 
+		function listar(data,editar = ''){
+			console.log('dsadasd',data.value)
+			$.ajax({
+				dataType: 'json',
+				async: false,
+				url: '../server/public/api/sprints/us',
+				type: 'POST', 
+				data: {id:data.value},
+				success: function (data, status, xhr) {
+					console.log(data);
+					let us = data.us;
+					let options = '<option value=""> - </option>';
+					for (let index = 0; index < us.length; index++) {
+						let element = us[index];
+						options += `<option value="`+element.id_user_storie+`"> `+element.titulo+` </option>`;
+					}
+
+					$('#id_user_storie'+editar).html(options)
+				},
+				error: function (xhr) {
+					$("#msjRegistro").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
+				}
+			});
+		}
+
+		function iniciarSprint(id){
+			document.location.href = './sprint.php?id='+id
+		}
+
 		function guardar(){
 			let datas = {
-				nombre: $('#nombre').val(),
-				estado: $('#estado').val(),
+				id_user_storie: $('#id_user_storie').val(),
+				fecha_inicio: (new Date()).toISOString().substr(0, 10),
+				fecha_fin: $('#fecha_fin').val(),
 				id_proyecto: $('#id_proyecto').val()
 			} 
 
-			verificar(datas)
+			// verificar(datas)
 
 			console.log(datas)
 			// return false
 			$.ajax({
 				dataType: 'html',
 				async: false,
-				url: '../server/public/api/backlogs/create',
+				url: '../server/public/api/sprints/create',
 				type: 'POST', 
 				data: datas,
 				success: function (data, status, xhr) {
@@ -344,13 +385,13 @@
 
 		function guardarEditar(){
 			let data = {
-				id_backlog: $('#id_backlog').val(),
-				nombre: $('#nombre_editar').val(),
+				id_sprint: $('#id_sprint').val(),
 				id_proyecto: $('#id_proyecto_editar').val(),
-				estado: $('#estado_editar').val()
+				id_user_storie: $('#id_user_storie_editar').val(),
+				fecha_fin: $('#fecha_fin_editar').val()
 			};
 
-			verificar(data,'editar')
+			// verificar(data,'editar')
 
 			console.log(data)
 
@@ -359,7 +400,7 @@
 			$.ajax({
 				dataType: 'json',
 				async: false,
-				url: '../server/public/api/backlogs/edit',
+				url: '../server/public/api/sprints/edit',
 				type: 'POST',
 				data: data,
 				success: function (data, status, xhr) {
@@ -372,67 +413,64 @@
 			});
 		}
 
-		function eliminarDuplicados(arrayIn) {
-			var arrayOut = [];
-			arrayOut.push(arrayIn[0]);
-
-			arrayIn.forEach(item=> {
-				var exists = arrayOut.filter(x=>x.id_usuario == item.id_usuario)
-				if(exists.length == 0) arrayOut.push(item);
-			})
-
-			return arrayOut;
-		}
-
-		function lista_usuario(data){
-			let lista = eliminarDuplicados(data)
-			let options = '<option value=""> - </option>';
-			for (let index = 0; index < lista.length; index++) {
-				let element = lista[index];
-				let nombre_apellido = element['nombre'] + element['apellido'];
-				options += `<option value="`+element['id_usuario']+`">`+nombre_apellido+`</option>`;
-			}
-			
-			$('#id_usuario,#id_usuario_editar').html(options)
-		}
-
 		function editar(id) {
+			console.log('asdasdsa',id)
 			$.ajax({
 				dataType: 'json',
 				async: false,
-				url: '../server/public/api/backlog/list',
+				url: '../server/public/api/sprint/list',
 				type: 'POST', 
 				data: {id:id},
 				success: function (data, status, xhr) {
-					console.log(data);
-					let datas = data.data[0],
-						proyectos = data.proyectos;
+					console.log('data',data);
+					// return false
+					let proyectos = data.proyectos,
+						sprints = data.sprints[0],
+						us = data.us;
 
-					$("#nombre_editar").val(datas.nombre);
-					$("#estado_editar").val(datas.estado);
-					$("#id_backlog").val(datas.id_backlog);
+					$("#id_sprint").val(sprints.id_sprint);
+					$("#id_proyecto_editar").val(sprints.id_proyecto);
+					console.log('asdasdasd',sprints)
+					$("#fecha_fin_editar").val(sprints.fecha_fin);
 
 					let options = '<option> - </option>';
 					for(let k=0;k < proyectos.length; k++){
 						let element = proyectos[k];
 						let selected = '';
 
-						if(element.id_proyecto == datas.id_proyecto){
+						if(element.id_proyecto == sprints.id_proyecto){
 							selected = 'selected';
 						}
 
-						console.log(element.id_proyecto,datas.id_proyecto)
+						console.log(element.id_proyecto,sprints.id_proyecto)
 						options += '<option '+selected+' value="'+element.id_proyecto+'">'+element.nombre+'</option>'
 					}
 
 					$("#id_proyecto_editar").html(options);
+
+					options = '<option value=""> - </option>';
+					let seleccionados = [];
+					for (let index = 0; index < us.length; index++) {
+						let element = us[index];
+						let selected = '';
+
+						if(element.id_relacion != null){
+							seleccionados.push(element.id_user_storie)
+							selected = 'selected';
+						}
+
+						options += `<option value="`+element.id_user_storie+`"> `+element.titulo+` </option>`;
+					}
+					console.log(seleccionados)
+					
+					$('#id_user_storie_editar').html(options);
+					$('#id_user_storie_editar').val(seleccionados).trigger('change');
 					$('#modalEditar').modal();
 				},
 				error: function (xhr) {
 					$("#msjRegistro").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
 				}
 			});
-
 		}
 
 		function preguntaBorrado(id){
@@ -442,14 +480,14 @@
 		}
 
 		function confirmarBorrado(){
-			let id_backlog = $("#id_eliminar").val();
+			let id = $("#id_eliminar").val();
 
 			$.ajax({
 				dataType: 'html',
 				type: 'POST',
-				url: '../server/public/api/backlogs/delete',
+				url: '../server/public/api/sprints/delete',
 				cache: false,
-				data: {id_backlog: id_backlog},
+				data: {id: id},
 				beforeSend: function(){
 					$("#mensaje_eliminar").html("<img src='images/progress_bar.gif'>");
 				},

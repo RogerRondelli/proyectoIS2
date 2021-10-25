@@ -782,14 +782,14 @@ $app->group('/api', function(\Slim\App $app) {
 
                 $sql = "SELECT b.nombre,p.nombre as nombre_proyecto,b.estado,b.id_backlog
                         FROM backlogs b
-                        JOIN proyectos p ON p.id_proyecto = b.id_proyecto
+                        JOIN proyectos p ON p.id_backlog = b.id_backlog
                         ORDER BY b.id_backlog ASC";
 
                 $backlogs = consulta($db,$sql);
 
                 $sql = "SELECT *
                         FROM proyectos
-                        WHERE id_proyecto NOT IN (SELECT id_proyecto
+                        WHERE id_backlog NOT IN (SELECT id_backlog
                                                     FROM backlogs)";
 
                 $proyectos = consulta($db,$sql);
@@ -818,18 +818,19 @@ $app->group('/api', function(\Slim\App $app) {
                 $id = $_POST['id'];
                 $db = $this->db;
 
-                $sql = "SELECT b.nombre,p.nombre as nombre_proyecto,b.estado,b.id_backlog,b.id_proyecto
+                $sql = "SELECT b.nombre,p.nombre as nombre_proyecto,b.estado,b.id_backlog,p.id_proyecto
                         FROM backlogs b
-                        JOIN proyectos p ON p.id_proyecto = b.id_proyecto
+                        JOIN proyectos p ON p.id_backlog = b.id_backlog
                         WHERE b.id_backlog = $id
                         ORDER BY b.id_backlog ASC";
 
                 $backlogs = consulta($db,$sql);
 
-                $sql = "SELECT p.nombre, p.id_proyecto
-                        FROM proyectos p
-                        LEFT JOIN backlogs b ON (b.id_proyecto != p.id_proyecto AND b.id_proyecto = '') OR b.id_backlog = $id
-                        ORDER BY p.id_proyecto ASC";
+                $sql = "SELECT nombre, id_proyecto
+                        FROM proyectos 
+                        WHERE id_backlog NOT IN (SELECT id_backlog
+                                                    FROM backlogs) OR id_backlog = $id
+                        ORDER BY id_proyecto ASC";
 
                 $proyectos = consulta($db,$sql);
 
@@ -860,9 +861,16 @@ $app->group('/api', function(\Slim\App $app) {
                 $id_proyecto = $_POST['id_proyecto'];
                 $estado = $_POST['estado'];
 
-                $sql = "INSERT INTO backlogs (nombre, estado, id_proyecto) 
+                $sql = "INSERT INTO backlogs (nombre, estado) 
                                             VALUES
-                                            ('$nombre', '$estado', '$id_proyecto')";
+                                            ('$nombre', '$estado')";
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+                $id_backlog = $db->lastInsertId();
+
+                $sql = "UPDATE proyectos SET id_backlog='$id_backlog'
+                        WHERE id_proyecto='$id_proyecto'";
+
                 $stmt = $db->prepare($sql);
                 $stmt->execute();
             
@@ -894,9 +902,20 @@ $app->group('/api', function(\Slim\App $app) {
                 $id_proyecto = $_POST['id_proyecto'];
 
                 $sql = "UPDATE backlogs SET nombre='$nombre', 
-                                        estado='$estado',
-                                        id_proyecto='$id_proyecto'
+                                        estado='$estado'
                         WHERE id_backlog='$id_backlog'";
+
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+                $sql = "UPDATE proyectos SET id_backlog=0
+                WHERE id_backlog='$id_backlog'";
+
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+                $sql = "UPDATE proyectos SET id_backlog='$id_backlog'
+                        WHERE id_proyecto='$id_proyecto'";
 
                 $stmt = $db->prepare($sql);
                 $stmt->execute();
@@ -955,7 +974,7 @@ $app->group('/api', function(\Slim\App $app) {
             try {
                 $db = $this->db;
 
-                $sql = "SELECT us.descripcion, us.id_user_storie, b.nombre, u.nombre as nombre_usuario, u.apellido
+                $sql = "SELECT us.descripcion, us.id_user_storie, us.titulo, b.nombre, u.nombre as nombre_usuario, u.apellido
                         FROM user_stories us
                         JOIN backlogs b ON b.id_backlog = us.id_backlog
                         JOIN usuarios u ON u.id_usuario = us.id_usuario
@@ -1041,10 +1060,11 @@ $app->group('/api', function(\Slim\App $app) {
                 $descripcion = $_POST['descripcion'];
                 $id_backlog = $_POST['id_backlog'];
                 $id_usuario = $_POST['id_usuario'];
+                $titulo = $_POST['titulo'];
 
-                $sql = "INSERT INTO user_stories (descripcion, id_backlog, id_usuario) 
+                $sql = "INSERT INTO user_stories (descripcion, id_backlog, id_usuario, titulo) 
                                             VALUES
-                                            ('$descripcion', '$id_backlog', '$id_usuario')";
+                                            ('$descripcion', '$id_backlog', '$id_usuario', '$titulo')";
                 $stmt = $db->prepare($sql);
                 $stmt->execute();
             
@@ -1074,9 +1094,11 @@ $app->group('/api', function(\Slim\App $app) {
                 $descripcion = $_POST['descripcion'];
                 $id_backlog = $_POST['id_backlog'];
                 $id_usuario = $_POST['id_usuario'];
+                $titulo = $_POST['titulo'];
 
                 $sql = "UPDATE user_stories SET descripcion='$descripcion', 
                                         id_backlog='$id_backlog',
+                                        titulo='$titulo',
                                         id_usuario='$id_usuario'
                         WHERE id_user_storie='$id_user_storie'";
 
@@ -1131,4 +1153,263 @@ $app->group('/api', function(\Slim\App $app) {
                                         );
             }
         });
+
+    //SPRINTS
+        $app->get('/sprints/list', function(Request $request, Response $response){
+            try {
+                $db = $this->db;
+
+                $sql = "SELECT s.*, p.nombre
+                        FROM sprints s
+                        JOIN proyectos p ON p.id_proyecto = s.id_proyecto
+                        ORDER BY s.id_sprint ASC";
+
+                $sprints = consulta($db,$sql);
+
+                $sql = "SELECT *
+                        FROM proyectos
+                        WHERE id_proyecto NOT IN (SELECT id_proyecto FROM sprints)
+                        ORDER BY id_proyecto ASC";
+
+                $proyectos = consulta($db,$sql);
+
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'sprints' => $sprints,
+                                                    'proyectos' => $proyectos,
+                                                ]);
+            } 
+            catch(PDOException $e)
+            { 
+                return json_encode( array( 
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e ) 
+                                        );
+            }
+        });
+
+        $app->post('/sprints/us', function(Request $request, Response $response){
+            try {
+                $id = $_POST['id'];
+                $db = $this->db;
+                $us = usList($db,$id);
+
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'us' => $us
+                                                ]);
+            } 
+            catch(PDOException $e)
+            { 
+                return json_encode( array( 
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e ) 
+                                        );
+            }
+        });
+
+        $app->post('/sprint/list', function(Request $request, Response $response){
+            try {
+                $id = $_POST['id'];
+                $db = $this->db;
+
+                $sql = "SELECT s.*, p.nombre
+                        FROM sprints s
+                        JOIN proyectos p ON p.id_proyecto = s.id_proyecto
+                        WHERE s.id_sprint = $id 
+                        ORDER BY s.id_sprint ASC";
+
+                $sprints = consulta($db,$sql);
+
+                $id_proyecto = $sprints[0]->id_proyecto;
+
+                $sql = "SELECT *
+                        FROM proyectos
+                        WHERE id_proyecto NOT IN (SELECT id_proyecto FROM sprints) OR id_proyecto = $id_proyecto
+                        ORDER BY id_proyecto ASC";
+
+                $proyectos = consulta($db,$sql);
+
+                $us = usList($db,$id_proyecto,1);
+
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'sprints' => $sprints,
+                                                    'proyectos' => $proyectos,
+                                                    'us' => $us,
+                                                ]);
+            } 
+            catch(PDOException $e)
+            {
+                return $this->response->withJson([
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e 
+                ]);
+            }
+        });
+
+        $app->post('/sprints/create', function(Request $request, Response $response){
+            try {
+                $db = $this->db;
+                
+                $id_proyecto = $_POST['id_proyecto'];
+                $fecha_fin = $_POST['fecha_fin'];
+                $fecha_inicio = $_POST['fecha_inicio'];
+                $id_user_storie = $_POST['id_user_storie'];
+
+                $sql = "INSERT INTO sprints (id_proyecto, fecha_fin, fecha_inicio) 
+                                            VALUES
+                                            ('$id_proyecto', '$fecha_fin', '$fecha_inicio')";
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+                $id_sprint = $db->lastInsertId();
+
+                for ($i=0; $i < count($id_user_storie); $i++) { 
+                    $sql = "INSERT INTO relaciones_us 
+                            (id_sprint, id_user_storie) 
+                            VALUES
+                            ('$id_sprint', '$id_user_storie[$i]')";
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+                }
+            
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'data' => ''
+                                                ]);
+            } 
+            catch(PDOException $e)
+            {
+                return json_encode( array( 
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e ) 
+                                        );
+            }
+        });
+
+        $app->post('/sprints/edit', function(Request $request, Response $response){
+            try {
+                $db = $this->db;
+                
+                $id_user_storie = $_POST['id_user_storie'];
+                $id_proyecto = $_POST['id_proyecto'];
+                $fecha_fin = $_POST['fecha_fin'];
+                $id_sprint = $_POST['id_sprint'];
+
+                $sql = "UPDATE sprints SET id_proyecto='$id_proyecto', 
+                                        fecha_fin='$fecha_fin'
+                        WHERE id_sprint='$id_sprint'";
+
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+                $sql = "DELETE FROM relaciones_us WHERE id_sprint = $id_sprint";
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+                for ($i=0; $i < count($id_user_storie); $i++) { 
+                    $sql = "INSERT INTO relaciones_us
+                            (id_sprint, id_user_storie) 
+                            VALUES
+                            ('$id_sprint', '$id_user_storie[$i]')";
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+                }
+
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'data' => ''
+                                                ]);
+            } 
+            catch(PDOException $e)
+            {
+                return json_encode( array( 
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e ) 
+                                        );
+            }
+        });
+
+        $app->post('/sprints/delete', function(Request $request, Response $response){
+            try {
+                $db = $this->db;
+                $id = $_POST['id'];
+
+                $sql = "DELETE FROM sprints WHERE id_sprint = $id";
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+
+                $sql = "DELETE FROM relaciones_us WHERE id_sprint='$id'";
+                $stmt = $db->prepare($sql);
+                $stmt->execute();
+            
+                return $this->response->withJson([
+                                                    'code' => 200,
+                                                    'status' => true, 
+                                                    'message' => '',
+                                                    'data' => ''
+                                                ]);
+            } 
+            catch(PDOException $e)
+            {
+                return json_encode( array( 
+                                            'code' => 505, 
+                                            'status' => false, 
+                                            'message' => '',
+                                            'data' => $e ) 
+                                        );
+            }
+        });
 });
+
+function usList($db,$id,$type = null){
+    try{
+        $WHERE = "WHERE p.id_proyecto = $id AND us.id_user_storie NOT IN (SELECT id_user_storie FROM relaciones_us)";
+        $campos = "us.*";
+        $relacion = "";
+        
+        if($type != null){
+            $campos = "us.*,r.id_relacion";
+            $relacion = "LEFT JOIN relaciones_us r ON r.id_user_storie = us.id_user_storie";
+            $WHERE = "WHERE p.id_proyecto = $id";
+        }
+
+        $sql = "SELECT $campos
+                FROM user_stories us
+                JOIN proyectos p ON p.id_backlog = us.id_backlog
+                $relacion
+                $WHERE
+                ORDER BY us.id_user_storie ASC";
+
+        $us = consulta($db,$sql);
+
+        return $us;
+    }catch(PDOException $e){
+        return json_encode( array( 
+            'code' => 505, 
+            'status' => false, 
+            'message' => '',
+            'data' => $e ) 
+        );
+    }
+}

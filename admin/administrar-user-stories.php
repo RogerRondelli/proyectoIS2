@@ -55,6 +55,7 @@
 						<table class="table table-bordered">
 							<thead>
 								<tr>
+									<th>Titulo</th>
 									<th>Descripcion</th>
 									<th>Backlog</th>
 									<th>Usuario</th>
@@ -79,6 +80,12 @@
 						<!-- Modal body --> 
 						<div class="modal-body">
 							<table style="width:490px; margin:15px auto 0 auto">
+								<tr>
+									<td align="right" class="labelmodal">Titulo:</td>
+									<td align="left">
+										<input class="input_medium" id="titulo" autocomplete="off" required>
+									</td>
+								</tr>
 								<tr>
 									<td align="right" class="labelmodal">Descripcion:</td>
 									<td align="left"><textarea id="descripcion" name="descripcion" style="width: -webkit-fill-available;"></textarea></td>
@@ -128,7 +135,13 @@
 						<div class="modal-body">
 							<table style="width:490px; margin:15px auto 0 auto">
 								<tr>
-									<td align="right" class="labelmodal">Nombre:</td>
+									<td align="right" class="labelmodal">Titulo:</td>
+									<td align="left">
+										<input class="input_medium" id="titulo_editar" autocomplete="off" required>
+									</td>
+								</tr>
+								<tr>
+									<td align="right" class="labelmodal">Descripcion:</td>
                                     <input type="hidden" id="id_user_storie">
                                     <td align="left"><textarea id="descripcion_editar" name="descripcion_editar" style="width:-webkit-fill-available;"></textarea></td>
 								</tr>
@@ -212,6 +225,7 @@
 					for (let index = 0; index < user_stories.length; index++) {
 						let element = user_stories[index];
 						html += `<tr>
+									<td>`+element['titulo']+`</td>
 									<td>`+element['descripcion']+`</td>
 									<td>`+element['nombre']+`</td>
 									<td>`+element['nombre_usuario']+ ' ' +element['apellido']+`</td>
@@ -244,6 +258,7 @@
 		function guardar(){
 			let datas = {
 				descripcion: $('#descripcion').val(),
+				titulo: $('#titulo').val(),
 				id_usuario: $('#id_usuario').val(),
 				id_backlog: $('#id_backlog').val()
 			} 
@@ -274,6 +289,7 @@
 			let data = {
 				id_backlog: $('#id_backlog').val(),
 				descripcion: $('#descripcion_editar').val(),
+				titulo: $('#titulo_editar').val(),
 				id_user_storie: $('#id_user_storie').val(),
 				id_usuario: $('#id_usuario_editar').val()
 			};
@@ -333,6 +349,7 @@
 					let user_stories = data.user_stories[0];
 
 					$("#descripcion_editar").val(user_stories.descripcion);
+					$("#titulo_editar").val(user_stories.titulo);
 					$("#id_backlog").val(user_stories.id_backlog);
 					$("#id_user_storie").val(user_stories.id_user_storie);
 					$("#id_usuario_editar").val(user_stories.id_usuario);

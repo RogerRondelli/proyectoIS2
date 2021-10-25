@@ -136,8 +136,8 @@ function menu($id,$tipo){
 
 	$menus = $db->loadObjectList();
 
-	$salida_menu = "<ul class='nav navbar-nav'>";
-		//<li class='active'><a href='./index.php'>Inicio</a></li>";
+	$salida_menu = "<ul class='nav navbar-nav'>
+		<li class='active'><a href='./index.php'>Inicio</a></li>";
 
 	$menuActual = '';
 	$usoSubmenu = 0;
