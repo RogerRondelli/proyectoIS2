@@ -57,11 +57,11 @@ CREATE TABLE `comentarios` (
   `comentario` text NOT NULL,
   `fecha` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id_comentario`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `comentarios` */
 
-insert  into `comentarios`(`id_comentario`,`id_sprint`,`id_usuario`,`id_user_storie`,`comentario`,`fecha`) values (1,1,1,0,'hola','2021-11-21 11:59:26'),(2,1,1,0,'hoa','2021-11-21 12:03:30'),(3,1,1,0,'asdasd','2021-11-21 12:15:38'),(4,1,1,0,'nmdnmzxc','2021-11-21 12:15:58'),(5,1,1,0,'','2021-11-21 12:20:03'),(6,1,1,0,'','2021-11-21 12:20:12'),(7,1,1,0,'','2021-11-21 12:29:05'),(8,1,1,0,'','2021-11-21 12:29:12'),(9,2,1,0,'Hola que tal','2021-11-21 21:01:24'),(10,2,1,0,'hloasd','2021-11-21 21:01:35'),(11,2,1,0,'asadhas hajshdasj','2021-11-21 21:01:55');
+insert  into `comentarios`(`id_comentario`,`id_sprint`,`id_usuario`,`id_user_storie`,`comentario`,`fecha`) values (1,1,1,0,'hola','2021-11-21 11:59:26'),(2,1,1,0,'hoa','2021-11-21 12:03:30'),(3,1,1,0,'asdasd','2021-11-21 12:15:38'),(4,1,1,0,'nmdnmzxc','2021-11-21 12:15:58'),(5,1,1,0,'','2021-11-21 12:20:03'),(6,1,1,0,'','2021-11-21 12:20:12'),(7,1,1,0,'','2021-11-21 12:29:05'),(8,1,1,0,'','2021-11-21 12:29:12'),(9,2,1,0,'Hola que tal','2021-11-21 21:01:24'),(10,2,1,0,'hloasd','2021-11-21 21:01:35'),(11,2,1,0,'asadhas hajshdasj','2021-11-21 21:01:55'),(12,2,1,0,'sdasd','2021-11-22 17:13:48'),(13,2,1,0,'asdasda','2021-11-22 17:16:17'),(14,2,1,0,'sdasd','2021-11-22 17:17:21'),(15,2,1,0,'sdasd','2021-11-22 17:17:27'),(16,2,1,0,'sdadas','2021-11-22 17:27:30');
 
 /*Table structure for table `empresas` */
 
@@ -150,7 +150,7 @@ CREATE TABLE `proyectos` (
 
 /*Data for the table `proyectos` */
 
-insert  into `proyectos`(`id_proyecto`,`id_backlog`,`nombre`,`estado`,`fecha_registro`) values (6,4,'Prueba','Abierto','2021-10-24 01:37:32'),(7,0,'prueba 2','Abierto','2021-11-21 20:57:36'),(8,1,'prueba 3','Abierto','2021-10-24 02:00:45'),(9,5,'prueba 4','Abierto','2021-11-21 20:57:36');
+insert  into `proyectos`(`id_proyecto`,`id_backlog`,`nombre`,`estado`,`fecha_registro`) values (6,4,'Prueba','Abierto','2021-10-24 01:37:32'),(7,0,'prueba 2','Abierto','2021-11-21 20:57:36'),(8,1,'prueba 3','Abierto','2021-10-24 02:00:45'),(9,5,'prueba 4','Cerrado','2021-11-22 17:54:42');
 
 /*Table structure for table `relaciones_us` */
 
@@ -224,11 +224,11 @@ CREATE TABLE `sprints` (
   `fecha_inicio` date NOT NULL,
   `fecha_fin` date NOT NULL,
   PRIMARY KEY (`id_sprint`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `sprints` */
 
-insert  into `sprints`(`id_sprint`,`id_proyecto`,`estado`,`fecha_inicio`,`fecha_fin`) values (1,8,'Iniciar','2021-10-24','2021-11-08'),(2,9,'Iniciar','2021-11-21','2021-12-05');
+insert  into `sprints`(`id_sprint`,`id_proyecto`,`estado`,`fecha_inicio`,`fecha_fin`) values (1,8,'Iniciar','2021-10-24','2021-11-08'),(2,9,'Cerrar','2021-11-21','2021-12-05'),(3,6,'Iniciar','2021-11-22','2021-12-06');
 
 /*Table structure for table `user_stories` */
 
@@ -243,11 +243,11 @@ CREATE TABLE `user_stories` (
   `fecha` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `estado` int(2) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id_user_storie`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
 
 /*Data for the table `user_stories` */
 
-insert  into `user_stories`(`id_user_storie`,`id_backlog`,`id_usuario`,`titulo`,`descripcion`,`fecha`,`estado`) values (1,1,191,'us1','prueba user storie','2021-11-21 13:14:49',0),(3,1,190,'us2','prueba 2','2021-11-21 17:20:44',1),(4,5,192,'us3','prueba 3','2021-11-21 21:01:51',2),(5,5,191,'us4','nueva prueba','2021-11-21 21:01:31',2);
+insert  into `user_stories`(`id_user_storie`,`id_backlog`,`id_usuario`,`titulo`,`descripcion`,`fecha`,`estado`) values (1,1,191,'us1','prueba user storie','2021-11-21 13:14:49',0),(3,1,190,'us2','prueba 2','2021-11-21 17:20:44',1),(4,5,192,'us3','prueba 3','2021-11-22 17:17:25',2),(5,5,191,'us4','nueva prueba','2021-11-22 17:27:29',2),(6,4,190,'prueba nueva','hola que tal','2021-11-22 17:48:38',0);
 
 /*Table structure for table `usuarios` */
 
