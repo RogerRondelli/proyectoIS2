@@ -56,7 +56,7 @@
 					<div class="col-md-9" id="mensaje"></div>
 				</div>
                 <br><br>
-                <div id="kanban"></div>  
+                <div id="kanban" style="display:none"></div>  
 				<!-- The Modal -->
 				<div class="modal" id="myModal">
 					<div class="modal-dialog">
@@ -108,7 +108,7 @@
     <script type="text/javascript" src="https://www.jqwidgets.com/jquery-widgets-documentation/jqwidgets/jqxdata.js"></script>
     <script type="text/javascript">
 		var estados = ['new','work','done'];
-		
+		var estado_sprint;
 		console.log(estados,estados[0],estados.indexOf('new'))
         $(document).ready(function () {
 			// table(id);	
@@ -126,6 +126,7 @@
 
 				console.log('data',datas,args,usuario)
 				if(datas.id_usuario != usuario && usuario != 1) return false
+				if(estado_sprint == "Cerrar") return false
 				// return false
 				$.ajax({
 					dataType: 'json',
@@ -145,10 +146,6 @@
 					}
 				});
 			});
-
-			var countWork = ($('#kanban').jqxKanban('getColumnItems', 'work')).length;
-			var countNew = ($('#kanban').jqxKanban('getColumnItems', 'new')).length;
-			var countDone = ($('#kanban').jqxKanban('getColumnItems', 'done')).length;
 			console.log('column',countWork,countNew,countDone)
 		});
 
@@ -160,7 +157,7 @@
 						  { id: "9034", state: "new", label: "Login 404 issue", tags: "issue, login", hex: "#6bbd49" }
 		];
 
-		var estado;
+		var estado,total_registros;
 		function us(){
 			let datas = {
 				id:id
@@ -174,10 +171,14 @@
 				data: datas,
 				success: function (data, status, xhr) {
 					estado = data.estado;
-					console.log(data,estado,estado.toLowerCase());
+					estado_sprint = estado;
 					let show = 'iniciar';
 					if(estado == 'Iniciar') show = 'cerrar';
 					$('.'+show).show();
+					if(estado == 'Cerrar' || estado == 'Iniciar') $('#kanban').show();
+					if(estado == 'Cerrar') $('.cerrar,.iniciar').hide();
+					total_registros = data.data.length;
+					console.log(data,estado,estado.toLowerCase(),total_registros);
 					table(data.data);
 					// location.reload();
 				},
@@ -226,7 +227,8 @@
 					{ text: "To-do", dataField: "new" },
 					{ text: "Doing", dataField: "work" },
 					{ text: "Done", dataField: "done" }
-				]
+				],
+				width: '100%'
 			}); 
 		}
 
@@ -252,7 +254,7 @@
 		}
 		
 		function statusSprint(){
-			console.log('asdadsadasdasd')
+			// console.log('asdadsadasdasd')
 			let estado_;
 			if(estado == 'Pendiente') estado_ = 'Iniciar';
 			if(estado == 'Iniciar') estado_ = 'Cerrar';
@@ -262,7 +264,18 @@
 				id: id,
 				estado: estado_
 			}
-			console.log('asdadsadasdasd',datas)
+
+			var countDone = ($('#kanban').jqxKanban('getColumnItems', 'done')).length; 
+			console.log('asdadsadasdasd',datas,total_registros,countDone)
+
+			if(estado_ == 'Cerrar' && total_registros != countDone){
+				alert('Para poder finalizar el sprint todos los UH deben de estar en la columna Done') 
+				return false
+			} 
+			if(total_registros == 0){
+				alert('El sprint no posee UH por lo que no puede ser iniciado') 
+				return false
+			} 
 			// return false
 			$.ajax({
 				dataType: 'json',

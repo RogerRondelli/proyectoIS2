@@ -1490,6 +1490,24 @@ $app->group('/api', function(\Slim\App $app) {
 
                 $stmt = $db->prepare($sql);
                 $stmt->execute();
+
+                if($estado == 'Cerrar'){
+                    $sql = "SELECT s.*, p.nombre
+                        FROM sprints s
+                        JOIN proyectos p ON p.id_proyecto = s.id_proyecto
+                        WHERE s.id_sprint = $id_sprint 
+                        ORDER BY s.id_sprint ASC";
+
+                    $sprints = consulta($db,$sql);
+
+                    $id_proyecto = $sprints[0]->id_proyecto;
+
+                    $sql = "UPDATE proyectos SET estado='Cerrado'
+                    WHERE id_proyecto='$id_proyecto'";
+
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute();
+                }
             
                 return $this->response->withJson([
                                                     'code' => 200,
