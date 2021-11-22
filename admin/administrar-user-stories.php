@@ -287,7 +287,7 @@
 
 		function guardarEditar(){
 			let data = {
-				id_backlog: $('#id_backlog').val(),
+				id_backlog: $('#id_backlog_editar').val(),
 				descripcion: $('#descripcion_editar').val(),
 				titulo: $('#titulo_editar').val(),
 				id_user_storie: $('#id_user_storie').val(),

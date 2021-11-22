@@ -81,15 +81,7 @@
 								<tr>
 									<td align="right" class="labelmodal">Proyecto:</td>
 									<td align="left">
-										<select class="input_medium" id="id_proyecto" onchange="listar(this);">
-											<option value=""> - </option>
-										</select>
-									</td>
-								</tr>
-								<tr>
-									<td align="right" class="labelmodal">US:</td>
-									<td align="left">
-										<select class="input_medium" id="id_user_storie" multiple="multiple">
+										<select class="input_medium" id="id_proyecto">
 											<option value=""> - </option>
 										</select>
 									</td>
@@ -132,15 +124,7 @@
 									<td align="right" class="labelmodal">Proyecto:</td>
 									<td align="left">
 										<input type="hidden" id="id_sprint">
-										<select class="input_medium" id="id_proyecto_editar" onchange="listar(this,'_editar');">
-											<option value=""> - </option>
-										</select>
-									</td>
-								</tr>
-								<tr>
-									<td align="right" class="labelmodal">US:</td>
-									<td align="left">
-										<select class="input_medium" id="id_user_storie_editar" multiple="multiple">
+										<select class="input_medium" id="id_proyecto_editar">
 											<option value=""> - </option>
 										</select>
 									</td>
@@ -208,8 +192,6 @@
 
 			$('#fecha_fin').val(date)
 
-			$('#id_user_storie').select2();
-			$('#id_user_storie_editar').select2();
             $("#guardar_editar").click(function (event) {
 				let data = {
 					id_proyecto: $('#id_proyecto').val(),
@@ -326,38 +308,12 @@
 			}
 		}
 
-		function listar(data,editar = ''){
-			console.log('dsadasd',data.value)
-			$.ajax({
-				dataType: 'json',
-				async: false,
-				url: '../server/public/api/sprints/us',
-				type: 'POST', 
-				data: {id:data.value},
-				success: function (data, status, xhr) {
-					console.log(data);
-					let us = data.us;
-					let options = '<option value=""> - </option>';
-					for (let index = 0; index < us.length; index++) {
-						let element = us[index];
-						options += `<option value="`+element.id_user_storie+`"> `+element.titulo+` </option>`;
-					}
-
-					$('#id_user_storie'+editar).html(options)
-				},
-				error: function (xhr) {
-					$("#msjRegistro").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
-				}
-			});
-		}
-
 		function iniciarSprint(id){
 			document.location.href = './sprint.php?id='+id
 		}
 
 		function guardar(){
 			let datas = {
-				id_user_storie: $('#id_user_storie').val(),
 				fecha_inicio: (new Date()).toISOString().substr(0, 10),
 				fecha_fin: $('#fecha_fin').val(),
 				id_proyecto: $('#id_proyecto').val()
@@ -387,7 +343,6 @@
 			let data = {
 				id_sprint: $('#id_sprint').val(),
 				id_proyecto: $('#id_proyecto_editar').val(),
-				id_user_storie: $('#id_user_storie_editar').val(),
 				fecha_fin: $('#fecha_fin_editar').val()
 			};
 
@@ -448,23 +403,6 @@
 
 					$("#id_proyecto_editar").html(options);
 
-					options = '<option value=""> - </option>';
-					let seleccionados = [];
-					for (let index = 0; index < us.length; index++) {
-						let element = us[index];
-						let selected = '';
-
-						if(element.id_relacion != null){
-							seleccionados.push(element.id_user_storie)
-							selected = 'selected';
-						}
-
-						options += `<option value="`+element.id_user_storie+`"> `+element.titulo+` </option>`;
-					}
-					console.log(seleccionados)
-					
-					$('#id_user_storie_editar').html(options);
-					$('#id_user_storie_editar').val(seleccionados).trigger('change');
 					$('#modalEditar').modal();
 				},
 				error: function (xhr) {

@@ -31,6 +31,10 @@
 			font-weight: bold;
 		}
     </style>
+	<script>
+		var id = <?=$_GET['id']?>;
+		var usuario = <?=$_SESSION['sfpy_usuario']?>;
+	</script>
   </head>
 
   <body>
@@ -46,10 +50,10 @@
 			<div class="row">
 				<div class="col-md-12">
 					<div class="col-md-3"  style="padding-left:0">
-						<button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#myModal">Iniciar</button>
+						<button type="button" onclick="statusSprint()" style="display:none" class="iniciar btn btn-success btn-sm">Iniciar</button>
+						<button type="button" onclick="statusSprint()" style="display:none" class="cerrar btn btn-danger btn-sm">Cerrar</button>
 					</div>
 					<div class="col-md-9" id="mensaje"></div>
-
 				</div>
                 <br><br>
                 <div id="kanban"></div>  
@@ -65,33 +69,11 @@
 
 						<!-- Modal body --> 
 						<div class="modal-body">
-							<table style="width:490; margin:15px auto 0 auto">
-								<tr>
-									<td align="right" class="labelmodal">Proyecto:</td>
-									<td align="left">
-										<select class="input_medium" id="id_proyecto" onchange="listar(this);">
-											<option value=""> - </option>
-										</select>
-									</td>
-								</tr>
-								<tr>
-									<td align="right" class="labelmodal">US:</td>
-									<td align="left">
-										<select class="input_medium" id="id_user_storie" multiple="multiple">
-											<option value=""> - </option>
-										</select>
-									</td>
-								</tr>
-								<tr>
-									<td align="right" class="labelmodal">Fecha fin (2 semanas por defecto):</td>
-									<td align="left">
-										<input type="date" id="fecha_fin" name="trip-start">
-									</td>
-								</tr>
-								<tr>
-									<td id="msjRegistro" colspan="2"><br></td>
-								</tr>
-							</table>
+							<form id="formComentario">
+								<input type="hidden" name="id_usuario" value="<?=$_SESSION['sfpy_usuario']?>">
+								<input type="hidden" name="id_sprint" id="id_sprint">
+								<textarea name="comentario" id="comentario" cols="30" rows="10" style="width: 100%;height: 150px;"></textarea>
+							</form>
 						</div>
 
 						<!-- Modal footer -->
@@ -109,7 +91,6 @@
 
 	<?php echo piePagina(); ?>
 
-
 	<script type="text/javascript">
 
         $(document).ready(function () {
@@ -126,64 +107,180 @@
     <script type="text/javascript" src="https://www.jqwidgets.com/jquery-widgets-documentation/jqwidgets/jqxkanban.js"></script>
     <script type="text/javascript" src="https://www.jqwidgets.com/jquery-widgets-documentation/jqwidgets/jqxdata.js"></script>
     <script type="text/javascript">
+		var estados = ['new','work','done'];
+		
+		console.log(estados,estados[0],estados.indexOf('new'))
         $(document).ready(function () {
-            var fields = [
-                     { name: "id", type: "string" },
-                     { name: "status", map: "state", type: "string" },
-                     { name: "text", map: "label", type: "string" },
-                     { name: "tags", type: "string" },
-                     { name: "color", map: "hex", type: "string" },
-                     { name: "resourceId", type: "number" }
-            ];
-            var source =
-             {
-                 localData: [
-                          { id: "1161", state: "new", label: "Combine Orders", tags: "orders, combine", hex: "#5dc3f0", resourceId: 3 },
-                          { id: "1645", state: "work", label: "Change Billing Address", tags: "billing", hex: "#f19b60", resourceId: 1 },
-                          { id: "9213", state: "new", label: "One item added to the cart", tags: "cart", hex: "#5dc3f0", resourceId: 3 },
-                          { id: "6546", state: "done", label: "Edit Item Price", tags: "price, edit", hex: "#5dc3f0", resourceId: 4 },
-                          { id: "9034", state: "new", label: "Login 404 issue", tags: "issue, login", hex: "#6bbd49" }
-                 ],
-                 dataType: "array",
-                 dataFields: fields
-             };
-            var dataAdapter = new $.jqx.dataAdapter(source);
-            var resourcesAdapterFunc = function () {
-                var resourcesSource =
-                {
-                    localData: [
-                          { id: 0, name: "No name", image: "../../jqwidgets/styles/images/common.png", common: true },
-                          { id: 1, name: "Andrew Fuller", image: "../../images/andrew.png" },
-                          { id: 2, name: "Janet Leverling", image: "../../images/janet.png" },
-                          { id: 3, name: "Steven Buchanan", image: "../../images/steven.png" },
-                          { id: 4, name: "Nancy Davolio", image: "../../images/nancy.png" },
-                          { id: 5, name: "Michael Buchanan", image: "../../images/Michael.png" },
-                          { id: 6, name: "Margaret Buchanan", image: "../../images/margaret.png" },
-                          { id: 7, name: "Robert Buchanan", image: "../../images/robert.png" },
-                          { id: 8, name: "Laura Buchanan", image: "../../images/Laura.png" },
-                          { id: 9, name: "Laura Buchanan", image: "../../images/Anne.png" }
-                    ],
-                    dataType: "array",
-                    dataFields: [
-                         { name: "id", type: "number" },
-                         { name: "name", type: "string" },
-                         { name: "image", type: "string" },
-                         { name: "common", type: "boolean" }
-                    ]
-                };
-                var resourcesDataAdapter = new $.jqx.dataAdapter(resourcesSource);
-                return resourcesDataAdapter;
-            }
-            $('#kanban').jqxKanban({
-                resources: resourcesAdapterFunc(),
-                source: dataAdapter,
-                columns: [
-                    { text: "Backlog", dataField: "new" },
-                    { text: "In Progress", dataField: "work" },
-                    { text: "Done", dataField: "done" }
-                ]
-            }); 
-        });
+			// table(id);	
+			us();
+			$('#id_sprint').val(id);
+			$('#kanban').on('itemMoved', function (e) {
+				var args = e.args;
+				// e.preventDefault()
+				// return false
+				var datas = {
+					id : args.itemId,
+					id_usuario : args.itemData.resourceId,
+					estado : estados.indexOf(args.newColumn.dataField)
+				}
+
+				console.log('data',datas,args,usuario)
+				if(datas.id_usuario != usuario && usuario != 1) return false
+				// return false
+				$.ajax({
+					dataType: 'json',
+					async: false,
+					url: '../server/public/api/sprints/updateStatusKanban',
+					type: 'POST', 
+					data: datas,
+					success: function (data, status, xhr) {
+						console.log(data);
+						console.log('asdasdasdasd',e,estados.indexOf(args.newColumn.dataField))
+						$('#myModal').modal('show')
+						// table(data.data);
+						// location.reload();
+					},
+					error: function (xhr) {
+						$("#msjRegistro").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
+					}
+				});
+			});
+
+			var countWork = ($('#kanban').jqxKanban('getColumnItems', 'work')).length;
+			var countNew = ($('#kanban').jqxKanban('getColumnItems', 'new')).length;
+			var countDone = ($('#kanban').jqxKanban('getColumnItems', 'done')).length;
+			console.log('column',countWork,countNew,countDone)
+		});
+
+		let localData2= [
+						  { id: "1161", state: "new", label: "Combine Orders", tags: "orders, combine", hex: "#5dc3f0", resourceId: 3 },
+						  { id: "1645", state: "work", label: "Change Billing Address", tags: "billing", hex: "#f19b60", resourceId: 1 },
+						  { id: "9213", state: "new", label: "One item added to the cart", tags: "cart", hex: "#5dc3f0", resourceId: 3 },
+						  { id: "6546", state: "done", label: "Edit Item Price", tags: "price, edit", hex: "#5dc3f0", resourceId: 4 },
+						  { id: "9034", state: "new", label: "Login 404 issue", tags: "issue, login", hex: "#6bbd49" }
+		];
+
+		var estado;
+		function us(){
+			let datas = {
+				id:id
+			}
+
+			$.ajax({
+				dataType: 'json',
+				async: false,
+				url: '../server/public/api/sprints/listTableKanban',
+				type: 'POST', 
+				data: datas,
+				success: function (data, status, xhr) {
+					estado = data.estado;
+					console.log(data,estado,estado.toLowerCase());
+					let show = 'iniciar';
+					if(estado == 'Iniciar') show = 'cerrar';
+					$('.'+show).show();
+					table(data.data);
+					// location.reload();
+				},
+				error: function (xhr) {
+					$("#msjRegistro").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
+				}
+			});
+		}
+		
+		function table(datas){
+			let localData = [];
+			for(var i=0;datas.length > i;i++){
+				const element = datas[i];
+
+				localData.push({ 
+					id: element.id_user_storie, 
+					state: estados[element.estado], 
+					label: element.descripcion, 
+					tags: element.titulo, 
+					hex: "#5dc3f0", 
+					resourceId: element.id_usuario
+				})
+			}
+			console.log('id',localData)
+
+			var fields = [
+					 { name: "id", type: "string" },
+					 { name: "status", map: "state", type: "string" },
+					 { name: "text", map: "label", type: "string" },
+					 { name: "tags", type: "string" },
+					 { name: "color", map: "hex", type: "string" },
+					 { name: "resourceId", type: "number" }
+			];
+
+			var source =
+			{
+				 localData: localData,
+				 dataType: "array",
+				 dataFields: fields
+			};
+			var dataAdapter = new $.jqx.dataAdapter(source);
+			
+			$('#kanban').jqxKanban({
+				source: dataAdapter,
+				columns: [
+					{ text: "To-do", dataField: "new" },
+					{ text: "Doing", dataField: "work" },
+					{ text: "Done", dataField: "done" }
+				]
+			}); 
+		}
+
+		function guardar(){
+			let datas = $('#formComentario').serializeArray()
+			console.log(datas)
+			// return false
+			$.ajax({
+				dataType: 'html',
+				async: false,
+				url: '../server/public/api/sprints/comment',
+				type: 'POST', 
+				data: datas,
+				success: function (data, status, xhr) {
+					console.log(data);
+					$('#myModal').modal('hide');
+					// location.reload();
+				},
+				error: function (xhr) {
+					$("#msjRegistro").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
+				}
+			});
+		}
+		
+		function statusSprint(){
+			console.log('asdadsadasdasd')
+			let estado_;
+			if(estado == 'Pendiente') estado_ = 'Iniciar';
+			if(estado == 'Iniciar') estado_ = 'Cerrar';
+			if(estado == 'Cerrar') return false;
+			
+			let datas = {
+				id: id,
+				estado: estado_
+			}
+			console.log('asdadsadasdasd',datas)
+			// return false
+			$.ajax({
+				dataType: 'json',
+				async: false,
+				url: '../server/public/api/sprints/statusSprint',
+				type: 'POST', 
+				data: datas,
+				success: function (data, status, xhr) {
+					// estado = data.estado;
+					console.log(data);
+					// table(data.data);
+					location.reload();
+				},
+				error: function (xhr) {
+					$("#msjRegistro").html(alertDismissJS("No se pudo completar la operación: " + xhr.status + " " + xhr.statusText, 'error'));
+				}
+			});
+		}
     </script>
   </body>
 </html>
